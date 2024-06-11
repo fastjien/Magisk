@@ -16,3 +16,7 @@ native/out
 /.idea
 /build
 /captures
+
+#
+venv
+.DS_Store
