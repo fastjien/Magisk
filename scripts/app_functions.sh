@@ -102,7 +102,10 @@ post_ota() {
   cp -f $1 bootctl
   rm -f $1
   chmod 755 bootctl
-  ./bootctl hal-info || return
+  if ! ./bootctl hal-info; then
+    rm -f bootctl
+    return
+  fi
   SLOT_NUM=0
   [ $(./bootctl get-current-slot) -eq 0 ] && SLOT_NUM=1
   ./bootctl set-active-boot-slot $SLOT_NUM
@@ -112,24 +115,6 @@ rm -f /data/adb/bootctl
 rm -f /data/adb/post-fs-data.d/post_ota.sh
 EOF
   chmod 755 post-fs-data.d/post_ota.sh
-  cd /
-}
-
-add_hosts_module() {
-  # Do not touch existing hosts module
-  [ -d /data/adb/modules/hosts ] && return
-  cd /data/adb/modules
-  mkdir -p hosts/system/etc
-  cat << EOF > hosts/module.prop
-id=hosts
-name=Systemless Hosts
-version=1.0
-versionCode=1
-author=Magisk
-description=Magisk app built-in systemless hosts module
-EOF
-  magisk --clone /system/etc/hosts hosts/system/etc/hosts
-  touch hosts/update
   cd /
 }
 

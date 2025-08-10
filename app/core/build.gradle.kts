@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("plugin.parcelize")
+    id("dev.zacsweers.moshix")
     id("com.google.devtools.ksp")
 }
 
@@ -26,10 +27,15 @@ android {
         aidl = true
         buildConfig = true
     }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
 }
 
 dependencies {
-    api(project(":app:shared"))
+    api(project(":shared"))
+    coreLibraryDesugaring(libs.jdk.libs)
 
     api(libs.timber)
     api(libs.markwon.core)
@@ -48,9 +54,6 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.okhttp.dnsoverhttps)
 
-    implementation(libs.moshi)
-    ksp(libs.moshi.codegen)
-
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
@@ -60,5 +63,10 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.collection.ktx)
     implementation(libs.profileinstaller)
-    implementation(libs.lifecycle.process)
+
+    // We also implement all our tests in this module.
+    // However, we don't want to bundle test dependencies.
+    // That's why we make it compileOnly.
+    compileOnly(libs.test.junit)
+    compileOnly(libs.test.uiautomator)
 }

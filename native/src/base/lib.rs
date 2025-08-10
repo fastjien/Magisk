@@ -1,23 +1,27 @@
 #![allow(clippy::missing_safety_doc)]
-#![feature(format_args_nl)]
-#![feature(io_error_more)]
 
 pub use const_format;
 pub use libc;
 use num_traits::FromPrimitive;
 
-pub use cstr::*;
+pub use cstr::{
+    FsPathFollow, StrErr, Utf8CStr, Utf8CStrBuf, Utf8CStrBufArr, Utf8CStrBufRef, Utf8CString,
+};
 use cxx_extern::*;
+pub use dir::*;
+pub use ffi::fork_dont_care;
 pub use files::*;
 pub use logging::*;
 pub use misc::*;
 pub use result::*;
 
-mod cstr;
+pub mod cstr;
 mod cxx_extern;
+mod dir;
 mod files;
 mod logging;
 mod misc;
+mod mount;
 mod result;
 mod xwrap;
 
@@ -42,6 +46,7 @@ pub mod ffi {
         type Utf8CStrRef<'a> = &'a crate::cstr::Utf8CStr;
 
         fn mut_u8_patch(buf: &mut [u8], from: &[u8], to: &[u8]) -> Vec<usize>;
+        fn fork_dont_care() -> i32;
     }
 
     extern "Rust" {
@@ -51,7 +56,6 @@ pub mod ffi {
         fn set_log_level_state_cxx(level: LogLevelCxx, enabled: bool);
         fn exit_on_error(b: bool);
         fn cmdline_logging();
-        fn resize_vec(vec: &mut Vec<u8>, size: usize);
     }
 
     #[namespace = "rust"]
@@ -71,14 +75,5 @@ pub mod ffi {
 fn set_log_level_state_cxx(level: ffi::LogLevelCxx, enabled: bool) {
     if let Some(level) = LogLevel::from_i32(level.repr) {
         set_log_level_state(level, enabled)
-    }
-}
-
-fn resize_vec(vec: &mut Vec<u8>, size: usize) {
-    if size > vec.len() {
-        vec.reserve(size - vec.len());
-    }
-    unsafe {
-        vec.set_len(size);
     }
 }

@@ -4,7 +4,6 @@
 #include <base.hpp>
 #include <consts.hpp>
 #include <core.hpp>
-#include <selinux.hpp>
 #include <flags.h>
 
 using namespace std;
@@ -46,6 +45,9 @@ Available applets:
     fprintf(stderr, "\n\n");
     exit(1);
 }
+
+#define quote(s) #s
+#define str(s)   quote(s)
 
 int magisk_main(int argc, char *argv[]) {
     if (argc < 2)

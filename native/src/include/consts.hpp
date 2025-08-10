@@ -1,8 +1,6 @@
 #pragma once
 
 #define JAVA_PACKAGE_NAME "com.topjohnwu.magisk"
-#define ZYGISKLDR       "libzygisk.so"
-#define NBPROP          "ro.dalvik.vm.native.bridge"
 #define SECURE_DIR      "/data/adb"
 #define MODULEROOT      SECURE_DIR "/modules"
 #define MODULEUPGRADE   SECURE_DIR "/modules_update"
@@ -20,11 +18,8 @@
 #define BBPATH        INTLROOT "/busybox"
 #define ROOTOVL       INTLROOT "/rootdir"
 #define SHELLPTS      INTLROOT "/pts"
-#define ROOTMNT       ROOTOVL  "/.mount_list"
-#define SELINUXMOCK   INTLROOT "/selinux"
 #define MAIN_CONFIG   INTLROOT "/config"
 #define MAIN_SOCKET   DEVICEDIR "/socket"
-#define LOG_PIPE      DEVICEDIR "/log"
 
 constexpr const char *applet_names[] = { "su", "resetprop", nullptr };
 
@@ -39,7 +34,6 @@ constexpr const char *applet_names[] = { "su", "resetprop", nullptr };
 #define MAGISK_FILE_CON     "u:object_r:" SEPOL_FILE_TYPE ":s0"
 // Log pipe that only root and zygote can open
 #define SEPOL_LOG_TYPE      "magisk_log_file"
-#define MAGISK_LOG_CON      "u:object_r:" SEPOL_LOG_TYPE ":s0"
 
 extern int SDK_INT;
 #define APP_DATA_DIR (SDK_INT >= 24 ? "/data/user_de" : "/data/user")

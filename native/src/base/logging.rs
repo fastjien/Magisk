@@ -1,13 +1,12 @@
 use std::fmt;
-use std::fmt::Arguments;
-use std::io::{stderr, stdout, Write};
+use std::io::{Write, stderr, stdout};
 use std::process::exit;
 
 use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::FromPrimitive;
 
 use crate::ffi::LogLevelCxx;
-use crate::{Utf8CStr, Utf8CStrBufArr};
+use crate::{Utf8CStr, cstr};
 
 // Ugly hack to avoid using enum
 #[allow(non_snake_case, non_upper_case_globals)]
@@ -84,7 +83,7 @@ fn log_with_writer<F: FnOnce(LogWriter)>(level: LogLevel, f: F) {
     }
     f(logger.write);
     if matches!(level, LogLevel::ErrorCxx) && (logger.flags & LogFlag::ExitOnError) != 0 {
-        exit(1);
+        exit(-1);
     }
 }
 
@@ -96,14 +95,10 @@ pub fn log_from_cxx(level: LogLevelCxx, msg: &Utf8CStr) {
 
 pub fn log_with_formatter<F: FnOnce(Formatter) -> fmt::Result>(level: LogLevel, f: F) {
     log_with_writer(level, |write| {
-        let mut buf = Utf8CStrBufArr::default();
+        let mut buf = cstr::buf::default();
         f(&mut buf).ok();
         write(level, &buf);
     });
-}
-
-pub fn log_with_args(level: LogLevel, args: Arguments) {
-    log_with_formatter(level, |w| w.write_fmt(args));
 }
 
 pub fn cmdline_logging() {
@@ -125,23 +120,30 @@ pub fn cmdline_logging() {
 }
 
 #[macro_export]
+macro_rules! log_with_args {
+    ($level:expr, $($args:tt)+) => {
+        $crate::log_with_formatter($level, |w| writeln!(w, $($args)+))
+    }
+}
+
+#[macro_export]
 macro_rules! error {
     ($($args:tt)+) => {
-        $crate::log_with_args($crate::LogLevel::Error, format_args_nl!($($args)+))
+        $crate::log_with_formatter($crate::LogLevel::Error, |w| writeln!(w, $($args)+))
     }
 }
 
 #[macro_export]
 macro_rules! warn {
     ($($args:tt)+) => {
-        $crate::log_with_args($crate::LogLevel::Warn, format_args_nl!($($args)+))
+        $crate::log_with_formatter($crate::LogLevel::Warn, |w| writeln!(w, $($args)+))
     }
 }
 
 #[macro_export]
 macro_rules! info {
     ($($args:tt)+) => {
-        $crate::log_with_args($crate::LogLevel::Info, format_args_nl!($($args)+))
+        $crate::log_with_formatter($crate::LogLevel::Info, |w| writeln!(w, $($args)+))
     }
 }
 
@@ -149,7 +151,7 @@ macro_rules! info {
 #[macro_export]
 macro_rules! debug {
     ($($args:tt)+) => {
-        $crate::log_with_args($crate::LogLevel::Debug, format_args_nl!($($args)+))
+        $crate::log_with_formatter($crate::LogLevel::Debug, |w| writeln!(w, $($args)+))
     }
 }
 

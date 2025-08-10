@@ -19,7 +19,8 @@ run_cvd_bin() {
 }
 
 setup_env() {
-  curl -LO https://github.com/topjohnwu/magisk-files/releases/download/files/cuttlefish-base_0.9.30_amd64.deb
+  curl -LO https://github.com/topjohnwu/magisk-files/releases/download/files/cuttlefish-base_1.2.0_amd64.deb
+  sudo apt-get update
   sudo dpkg -i ./cuttlefish-base_*_*64.deb || sudo apt-get install -f
   rm cuttlefish-base_*_*64.deb
   echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -27,7 +28,9 @@ setup_env() {
   sudo udevadm trigger
   sudo usermod -aG kvm,cvdnetwork,render $USER
   yes | "$sdk" --licenses > /dev/null
-  "$sdk" --channel=3 tools platform-tools
+  "$sdk" --channel=3 platform-tools
+  adb kill-server
+  adb start-server
 }
 
 download_cf() {
@@ -35,12 +38,12 @@ download_cf() {
   local device=$2
 
   if [ -z $branch ]; then
-    branch='aosp-main'
+    branch='aosp-android-latest-release'
   fi
   if [ -z $device ]; then
-    device='aosp_cf_x86_64_phone'
+    device='aosp_cf_x86_64_only_phone'
   fi
-  local target="${device}-trunk_staging-userdebug"
+  local target="${device}-userdebug"
 
   local build_id=$(curl -sL https://ci.android.com/builds/branches/${branch}/status.json | \
     jq -r ".targets[] | select(.name == \"$target\") | .last_known_good_build")
@@ -65,7 +68,7 @@ test_cf() {
   print_title "* Testing $variant builds"
   timeout $boot_timeout bash -c "run_cvd_bin launch_cvd $cvd_args $magisk_args -resume=false"
   adb wait-for-device
-  test_setup $variant
+  run_setup $variant
 
   adb reboot
   sleep 5
@@ -73,20 +76,20 @@ test_cf() {
 
   timeout $boot_timeout bash -c "run_cvd_bin launch_cvd $cvd_args $magisk_args"
   adb wait-for-device
-  test_app
+  run_tests
 }
 
-run_test() {
+test_main() {
   # Launch stock cuttlefish
   run_cvd_bin launch_cvd $cvd_args -resume=false
   adb wait-for-device
 
   # Patch and test debug build
-  ./build.py avd_patch -s "$CF_HOME/init_boot.img" magisk_patched.img
+  ./build.py -v avd_patch "$CF_HOME/init_boot.img" magisk_patched.img
   test_cf debug
 
   # Patch and test release build
-  ./build.py -r avd_patch -s "$CF_HOME/init_boot.img" magisk_patched.img
+  ./build.py -vr avd_patch "$CF_HOME/init_boot.img" magisk_patched.img
   test_cf release
 
   # Cleanup
@@ -109,7 +112,7 @@ case "$1" in
   test )
     trap cleanup EXIT
     export -f run_cvd_bin
-    run_test
+    test_main
     trap - EXIT
     ;;
   * )

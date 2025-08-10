@@ -1,15 +1,18 @@
 #![feature(format_args_nl)]
 #![feature(btree_extract_if)]
 #![feature(iter_intersperse)]
+#![feature(try_blocks)]
 
 pub use base;
+use compress::{compress_bytes, compress_fd, decompress_bytes, decompress_bytes_fd};
 use cpio::cpio_commands;
 use dtb::dtb_commands;
 use patch::hexpatch;
 use payload::extract_boot_from_payload;
-use sign::{get_sha, sha1_hash, sha256_hash, sign_boot_image, verify_boot_image, SHA};
+use sign::{SHA, get_sha, sha1_hash, sha256_hash, sign_boot_image, verify_boot_image};
 use std::env;
 
+mod compress;
 mod cpio;
 mod dtb;
 mod patch;
@@ -21,11 +24,42 @@ mod sign;
 
 #[cxx::bridge]
 pub mod ffi {
+    enum FileFormat {
+        UNKNOWN,
+        /* Boot formats */
+        CHROMEOS,
+        AOSP,
+        AOSP_VENDOR,
+        DHTB,
+        BLOB,
+        /* Compression formats */
+        GZIP,
+        ZOPFLI,
+        XZ,
+        LZMA,
+        BZIP2,
+        LZ4,
+        LZ4_LEGACY,
+        LZ4_LG,
+        /* Unsupported compression */
+        LZOP,
+        /* Misc */
+        MTK,
+        DTB,
+        ZIMAGE,
+    }
+
     unsafe extern "C++" {
-        include!("compress.hpp");
-        fn decompress(buf: &[u8], fd: i32) -> bool;
-        fn xz(buf: &[u8], out: &mut Vec<u8>) -> bool;
-        fn unxz(buf: &[u8], out: &mut Vec<u8>) -> bool;
+        include!("../base/include/base.hpp");
+
+        #[namespace = "rust"]
+        #[cxx_name = "Utf8CStr"]
+        type Utf8CStrRef<'a> = base::ffi::Utf8CStrRef<'a>;
+    }
+
+    unsafe extern "C++" {
+        include!("format.hpp");
+        fn check_fmt(buf: &[u8]) -> FileFormat;
 
         include!("bootimg.hpp");
         #[cxx_name = "boot_img"]
@@ -46,14 +80,19 @@ pub mod ffi {
         fn sha256_hash(data: &[u8], out: &mut [u8]);
 
         fn hexpatch(file: &[u8], from: &[u8], to: &[u8]) -> bool;
+        fn compress_fd(format: FileFormat, in_fd: i32, out_fd: i32);
+        fn compress_bytes(format: FileFormat, in_bytes: &[u8], out_fd: i32);
+        fn decompress_bytes(format: FileFormat, in_bytes: &[u8], out_fd: i32);
+        fn decompress_bytes_fd(format: FileFormat, in_bytes: &[u8], in_fd: i32, out_fd: i32);
     }
 
     #[namespace = "rust"]
+    #[allow(unused_unsafe)]
     extern "Rust" {
-        unsafe fn extract_boot_from_payload(
-            partition: *const c_char,
-            in_path: *const c_char,
-            out_path: *const c_char,
+        fn extract_boot_from_payload(
+            partition: Utf8CStrRef,
+            in_path: Utf8CStrRef,
+            out_path: Utf8CStrRef,
         ) -> bool;
         unsafe fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool;
         unsafe fn verify_boot_image(img: &BootImage, cert: *const c_char) -> bool;
@@ -69,5 +108,5 @@ pub mod ffi {
 
 #[inline(always)]
 pub(crate) fn check_env(env: &str) -> bool {
-    env::var(env).map_or(false, |var| var == "true")
+    env::var(env).is_ok_and(|var| var == "true")
 }

@@ -2,12 +2,12 @@
 #include <libgen.h>
 #include <sys/un.h>
 #include <sys/mount.h>
+#include <sys/sysmacros.h>
+#include <linux/input.h>
 
 #include <consts.hpp>
 #include <base.hpp>
 #include <core.hpp>
-#include <selinux.hpp>
-#include <db.hpp>
 #include <flags.h>
 
 using namespace std;
@@ -128,42 +128,57 @@ static void poll_ctrl_handler(pollfd *pfd) {
     }
 }
 
-const MagiskD &MagiskD::get() {
-    return *reinterpret_cast<const MagiskD*>(&rust::get_magiskd());
+bool get_client_cred(int fd, sock_cred *cred) {
+    socklen_t len = sizeof(ucred);
+    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, cred, &len) != 0)
+        return false;
+    char buf[4096];
+    len = sizeof(buf);
+    if (getsockopt(fd, SOL_SOCKET, SO_PEERSEC, buf, &len) != 0)
+        len = 0;
+    buf[len] = '\0';
+    cred->context = buf;
+    return true;
 }
 
-const rust::MagiskD *MagiskD::operator->() const {
-    return reinterpret_cast<const rust::MagiskD*>(this);
+bool read_string(int fd, std::string &str) {
+    str.clear();
+    int len = read_int(fd);
+    str.resize(len);
+    return xxread(fd, str.data(), len) == len;
 }
 
-const rust::MagiskD &MagiskD::as_rust() const {
-    return *operator->();
+string read_string(int fd) {
+    string str;
+    read_string(fd, str);
+    return str;
 }
 
-void MagiskD::reboot() const {
-    if (as_rust().is_recovery())
-        exec_command_sync("/system/bin/reboot", "recovery");
-    else
-        exec_command_sync("/system/bin/reboot");
+void write_string(int fd, string_view str) {
+    if (fd < 0) return;
+    write_int(fd, str.size());
+    xwrite(fd, str.data(), str.size());
 }
 
 static void handle_request_async(int client, int code, const sock_cred &cred) {
+    auto &daemon = MagiskD::Get();
     switch (code) {
     case +RequestCode::DENYLIST:
         denylist_handler(client, &cred);
         break;
     case +RequestCode::SUPERUSER:
-        su_daemon_handler(client, &cred);
+        daemon.su_daemon_handler(client, cred);
         break;
-    case +RequestCode::ZYGOTE_RESTART:
+    case +RequestCode::ZYGOTE_RESTART: {
         LOGI("** zygote restarted\n");
-        prune_su_access();
+        daemon.prune_su_access();
         scan_deny_apps();
-        reset_zygisk(false);
+        daemon.zygisk_reset(false);
         close(client);
         break;
+    }
     case +RequestCode::SQLITE_CMD:
-        exec_sql(client);
+        daemon.db_exec(client);
         break;
     case +RequestCode::REMOVE_MODULES: {
         int do_reboot = read_int(client);
@@ -171,12 +186,12 @@ static void handle_request_async(int client, int code, const sock_cred &cred) {
         write_int(client, 0);
         close(client);
         if (do_reboot) {
-            MagiskD::get().reboot();
+            daemon.reboot();
         }
         break;
     }
     case +RequestCode::ZYGISK:
-        zygisk_handler(client, &cred);
+        daemon.zygisk_handler(client);
         break;
     default:
         __builtin_unreachable();
@@ -196,20 +211,14 @@ static void handle_request_sync(int client, int code) {
         write_int(client, MAGISK_VER_CODE);
         break;
     case +RequestCode::START_DAEMON:
-        MagiskD::get()->setup_logfile();
+        setup_logfile();
         break;
     case +RequestCode::STOP_DAEMON: {
         // Unmount all overlays
         denylist_handler(-1, nullptr);
 
         // Restore native bridge property
-        auto nb = get_prop(NBPROP);
-        auto len = sizeof(ZYGISKLDR) - 1;
-        if (nb == ZYGISKLDR) {
-            set_prop(NBPROP, "0");
-        } else if (nb.size() > len) {
-            set_prop(NBPROP, nb.data() + len);
-        }
+        restore_zygisk_prop();
 
         write_int(client, 0);
 
@@ -298,22 +307,9 @@ static void handle_request(pollfd *pfd) {
         exec_task([=, fd = client.release()] { handle_request_async(fd, code, cred); });
     } else {
         exec_task([=, fd = client.release()] {
-            MagiskD::get()->boot_stage_handler(fd, code);
+            MagiskD::Get().boot_stage_handler(fd, code);
         });
     }
-}
-
-static void switch_cgroup(const char *cgroup, int pid) {
-    char buf[32];
-    ssprintf(buf, sizeof(buf), "%s/cgroup.procs", cgroup);
-    if (access(buf, F_OK) != 0)
-        return;
-    int fd = xopen(buf, O_WRONLY | O_APPEND | O_CLOEXEC);
-    if (fd == -1)
-        return;
-    ssprintf(buf, sizeof(buf), "%d\n", pid);
-    xwrite(fd, buf, strlen(buf));
-    close(fd);
 }
 
 static void daemon_entry() {
@@ -337,69 +333,15 @@ static void daemon_entry() {
     if (fd > STDERR_FILENO)
         close(fd);
 
-    setsid();
-    setcon(MAGISK_PROC_CON);
-
     rust::daemon_entry();
-
-    LOGI(NAME_WITH_VER(Magisk) " daemon started\n");
-
-    // Escape from cgroup
-    int pid = getpid();
-    switch_cgroup("/acct", pid);
-    switch_cgroup("/dev/cg2_bpf", pid);
-    switch_cgroup("/sys/fs/cgroup", pid);
-    if (get_prop("ro.config.per_app_memcg") != "false") {
-        switch_cgroup("/dev/memcg/apps", pid);
-    }
+    SDK_INT = MagiskD::Get().sdk_int();
 
     // Get self stat
     xstat("/proc/self/exe", &self_st);
 
-    // Get API level
-    parse_prop_file("/system/build.prop", [](auto key, auto val) -> bool {
-        if (key == "ro.build.version.sdk") {
-            SDK_INT = parse_int(val);
-            return false;
-        }
-        return true;
-    });
-    if (SDK_INT < 0) {
-        // In case some devices do not store this info in build.prop, fallback to getprop
-        auto sdk = get_prop("ro.build.version.sdk");
-        if (!sdk.empty()) {
-            SDK_INT = parse_int(sdk);
-        }
-    }
-    LOGI("* Device API level: %d\n", SDK_INT);
-    
-    // Samsung workaround  #7887
-    if (access("/system_ext/app/mediatek-res/mediatek-res.apk", F_OK) == 0) {
-        set_prop("ro.vendor.mtk_model", "0");
-    }
-
-    restore_tmpcon();
-
-    // Cleanups
-    const char *tmp = get_magisk_tmp();
-    char path[64];
-    ssprintf(path, sizeof(path), "%s/" ROOTMNT, tmp);
-    if (access(path, F_OK) == 0) {
-        file_readline(true, path, [](string_view line) -> bool {
-            umount2(line.data(), MNT_DETACH);
-            return true;
-        });
-    }
-    if (getenv("REMOUNT_ROOT")) {
-        xmount(nullptr, "/", nullptr, MS_REMOUNT | MS_RDONLY, nullptr);
-        unsetenv("REMOUNT_ROOT");
-    }
-    ssprintf(path, sizeof(path), "%s/" ROOTOVL, tmp);
-    rm_rf(path);
-
     fd = xsocket(AF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
     sockaddr_un addr = {.sun_family = AF_LOCAL};
-    ssprintf(addr.sun_path, sizeof(addr.sun_path), "%s/" MAIN_SOCKET, tmp);
+    ssprintf(addr.sun_path, sizeof(addr.sun_path), "%s/" MAIN_SOCKET, get_magisk_tmp());
     unlink(addr.sun_path);
     if (xbind(fd, (sockaddr *) &addr, sizeof(addr)))
         exit(1);
@@ -409,7 +351,6 @@ static void daemon_entry() {
 
     default_new(poll_map);
     default_new(poll_fds);
-    default_new(module_list);
 
     // Register handler for main socket
     pollfd main_socket_pfd = { fd, POLLIN, 0 };
@@ -485,4 +426,117 @@ int connect_daemon(int req, bool create) {
         __builtin_unreachable();
     }
     return fd;
+}
+
+bool setup_magisk_env() {
+    char buf[4096];
+
+    LOGI("* Initializing Magisk environment\n");
+
+    ssprintf(buf, sizeof(buf), "%s/0/%s/install", APP_DATA_DIR, JAVA_PACKAGE_NAME);
+    // Alternative binaries paths
+    const char *alt_bin[] = { "/cache/data_adb/magisk", "/data/magisk", buf };
+    for (auto alt : alt_bin) {
+        if (access(alt, F_OK) == 0) {
+            rm_rf(DATABIN);
+            cp_afc(alt, DATABIN);
+            rm_rf(alt);
+        }
+    }
+    rm_rf("/cache/data_adb");
+
+    // Directories in /data/adb
+    chmod(SECURE_DIR, 0700);
+    xmkdir(DATABIN, 0755);
+    xmkdir(MODULEROOT, 0755);
+    xmkdir(SECURE_DIR "/post-fs-data.d", 0755);
+    xmkdir(SECURE_DIR "/service.d", 0755);
+    restorecon();
+
+    if (access(DATABIN "/busybox", X_OK))
+        return false;
+
+    ssprintf(buf, sizeof(buf), "%s/" BBPATH "/busybox", get_magisk_tmp());
+    mkdir(dirname(buf), 0755);
+    cp_afc(DATABIN "/busybox", buf);
+    exec_command_async(buf, "--install", "-s", dirname(buf));
+
+    // magisk32 and magiskpolicy are not installed into ramdisk and has to be copied
+    // from data to magisk tmp
+    if (access(DATABIN "/magisk32", X_OK) == 0) {
+        ssprintf(buf, sizeof(buf), "%s/magisk32", get_magisk_tmp());
+        cp_afc(DATABIN "/magisk32", buf);
+    }
+    if (access(DATABIN "/magiskpolicy", X_OK) == 0) {
+        ssprintf(buf, sizeof(buf), "%s/magiskpolicy", get_magisk_tmp());
+        cp_afc(DATABIN "/magiskpolicy", buf);
+    }
+
+    return true;
+}
+
+void unlock_blocks() {
+    int fd, dev, OFF = 0;
+
+    auto dir = xopen_dir("/dev/block");
+    if (!dir)
+        return;
+    dev = dirfd(dir.get());
+
+    for (dirent *entry; (entry = readdir(dir.get()));) {
+        if (entry->d_type == DT_BLK) {
+            if ((fd = openat(dev, entry->d_name, O_RDONLY | O_CLOEXEC)) < 0)
+                continue;
+            if (ioctl(fd, BLKROSET, &OFF) < 0)
+                PLOGE("unlock %s", entry->d_name);
+            close(fd);
+        }
+    }
+}
+
+#define test_bit(bit, array) (array[bit / 8] & (1 << (bit % 8)))
+
+bool check_key_combo() {
+    uint8_t bitmask[(KEY_MAX + 1) / 8];
+    vector<int> events;
+    constexpr char name[] = "/dev/.ev";
+
+    // First collect candidate events that accepts volume down
+    for (int minor = 64; minor < 96; ++minor) {
+        if (xmknod(name, S_IFCHR | 0444, makedev(13, minor)))
+            continue;
+        int fd = open(name, O_RDONLY | O_CLOEXEC);
+        unlink(name);
+        if (fd < 0)
+            continue;
+        memset(bitmask, 0, sizeof(bitmask));
+        ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(bitmask)), bitmask);
+        if (test_bit(KEY_VOLUMEDOWN, bitmask))
+            events.push_back(fd);
+        else
+            close(fd);
+    }
+    if (events.empty())
+        return false;
+
+    run_finally fin([&]{ std::for_each(events.begin(), events.end(), close); });
+
+    // Check if volume down key is held continuously for more than 3 seconds
+    for (int i = 0; i < 300; ++i) {
+        bool pressed = false;
+        for (const int &fd : events) {
+            memset(bitmask, 0, sizeof(bitmask));
+            ioctl(fd, EVIOCGKEY(sizeof(bitmask)), bitmask);
+            if (test_bit(KEY_VOLUMEDOWN, bitmask)) {
+                pressed = true;
+                break;
+            }
+        }
+        if (!pressed)
+            return false;
+        // Check every 10ms
+        usleep(10000);
+    }
+    LOGD("KEY_VOLUMEDOWN detected: enter safe mode\n");
+    return true;
 }

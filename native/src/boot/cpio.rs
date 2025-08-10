@@ -10,22 +10,23 @@ use std::process::exit;
 use std::str;
 
 use argh::FromArgs;
-use bytemuck::{from_bytes, Pod, Zeroable};
+use bytemuck::{Pod, Zeroable, from_bytes};
 use num_traits::cast::AsPrimitive;
 use size::{Base, Size, Style};
 
 use base::libc::{
-    c_char, dev_t, gid_t, major, makedev, minor, mknod, mode_t, uid_t, O_CLOEXEC, O_CREAT,
-    O_RDONLY, O_TRUNC, O_WRONLY, S_IFBLK, S_IFCHR, S_IFDIR, S_IFLNK, S_IFMT, S_IFREG, S_IRGRP,
-    S_IROTH, S_IRUSR, S_IWGRP, S_IWOTH, S_IWUSR, S_IXGRP, S_IXOTH, S_IXUSR,
+    O_CLOEXEC, O_CREAT, O_RDONLY, O_TRUNC, O_WRONLY, S_IFBLK, S_IFCHR, S_IFDIR, S_IFLNK, S_IFMT,
+    S_IFREG, S_IRGRP, S_IROTH, S_IRUSR, S_IWGRP, S_IWOTH, S_IWUSR, S_IXGRP, S_IXOTH, S_IXUSR,
+    c_char, dev_t, gid_t, major, makedev, minor, mknod, mode_t, uid_t,
 };
 use base::{
-    log_err, map_args, BytesExt, EarlyExitExt, FsPath, LoggedResult, MappedFile, ResultExt,
-    Utf8CStr, Utf8CStrBufArr, Utf8CStrWrite, WriteExt,
+    BytesExt, EarlyExitExt, LoggedResult, MappedFile, ResultExt, Utf8CStr, Utf8CStrBuf, WriteExt,
+    cstr, log_err, map_args,
 };
 
 use crate::check_env;
-use crate::ffi::{unxz, xz};
+use crate::compress::{get_decoder, get_encoder};
+use crate::ffi::FileFormat;
 use crate::patch::{patch_encryption, patch_verity};
 
 #[derive(FromArgs)]
@@ -268,13 +269,13 @@ impl Cpio {
     }
 
     fn load_from_file(path: &Utf8CStr) -> LoggedResult<Self> {
-        eprintln!("Loading cpio: [{}]", path);
+        eprintln!("Loading cpio: [{path}]");
         let file = MappedFile::open(path)?;
         Self::load_from_data(file.as_ref())
     }
 
     fn dump(&self, path: &str) -> LoggedResult<()> {
-        eprintln!("Dumping cpio: [{}]", path);
+        eprintln!("Dumping cpio: [{path}]");
         let mut file = File::create(path)?;
         let mut pos = 0usize;
         let mut inode = 300000i64;
@@ -308,7 +309,7 @@ impl Cpio {
         }
         pos += file.write(
             format!("070701{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}",
-                inode, 0o755, 0, 0, 1, 0, 0, 0, 0, 0, 0, 11, 0
+                    inode, 0o755, 0, 0, 1, 0, 0, 0, 0, 0, 0, 11, 0
             ).as_bytes()
         )?;
         pos += file.write("TRAILER!!!\0".as_bytes())?;
@@ -319,13 +320,13 @@ impl Cpio {
     fn rm(&mut self, path: &str, recursive: bool) {
         let path = norm_path(path);
         if self.entries.remove(&path).is_some() {
-            eprintln!("Removed entry [{}]", path);
+            eprintln!("Removed entry [{path}]");
         }
         if recursive {
             let path = path + "/";
             self.entries.retain(|k, _| {
                 if k.starts_with(&path) {
-                    eprintln!("Removed entry [{}]", k);
+                    eprintln!("Removed entry [{k}]");
                     false
                 } else {
                     true
@@ -339,16 +340,16 @@ impl Cpio {
             .entries
             .get(path)
             .ok_or_else(|| log_err!("No such file"))?;
-        eprintln!("Extracting entry [{}] to [{}]", path, out);
+        eprintln!("Extracting entry [{path}] to [{out}]");
 
         let out = Utf8CStr::from_string(out);
-        let out = FsPath::from(out);
 
-        let mut buf = Utf8CStrBufArr::default();
+        let mut buf = cstr::buf::default();
 
         // Make sure its parent directories exist
-        if out.parent(&mut buf) {
-            FsPath::from(&buf).mkdirs(0o755)?;
+        if let Some(dir) = out.parent_dir() {
+            buf.push_str(dir);
+            buf.mkdirs(0o755)?;
         }
 
         let mode: mode_t = (entry.mode & 0o777).into();
@@ -362,7 +363,7 @@ impl Cpio {
             S_IFLNK => {
                 buf.clear();
                 buf.push_str(str::from_utf8(entry.data.as_slice())?);
-                FsPath::from(&buf).symlink_to(out)?;
+                out.create_symlink_to(&buf)?;
             }
             S_IFBLK | S_IFCHR => {
                 let dev = makedev(entry.rdevmajor.try_into()?, entry.rdevminor.try_into()?);
@@ -399,7 +400,6 @@ impl Cpio {
             return Err(log_err!("path cannot end with / for add"));
         }
         let file = Utf8CStr::from_string(file);
-        let file = FsPath::from(&file);
         let attr = file.get_attr()?;
 
         let mut content = Vec::<u8>::new();
@@ -413,8 +413,8 @@ impl Cpio {
             file.open(O_RDONLY | O_CLOEXEC)?.read_to_end(&mut content)?;
             mode | S_IFREG
         } else {
-            rdevmajor = unsafe { major(attr.st.st_rdev.as_()) }.as_();
-            rdevminor = unsafe { minor(attr.st.st_rdev.as_()) }.as_();
+            rdevmajor = major(attr.st.st_rdev.as_()).as_();
+            rdevminor = minor(attr.st.st_rdev.as_()).as_();
             if attr.is_block_device() {
                 mode | S_IFBLK
             } else if attr.is_char_device() {
@@ -435,7 +435,7 @@ impl Cpio {
                 data: content,
             }),
         );
-        eprintln!("Add file [{}] ({:04o})", path, mode);
+        eprintln!("Add file [{path}] ({mode:04o})");
         Ok(())
     }
 
@@ -451,7 +451,7 @@ impl Cpio {
                 data: vec![],
             }),
         );
-        eprintln!("Create directory [{}] ({:04o})", dir, mode);
+        eprintln!("Create directory [{dir}] ({mode:04o})");
     }
 
     fn ln(&mut self, src: &str, dst: &str) {
@@ -466,7 +466,7 @@ impl Cpio {
                 data: norm_path(src).as_bytes().to_vec(),
             }),
         );
-        eprintln!("Create symlink [{}] -> [{}]", dst, src);
+        eprintln!("Create symlink [{dst}] -> [{src}]");
     }
 
     fn mv(&mut self, from: &str, to: &str) -> LoggedResult<()> {
@@ -475,7 +475,7 @@ impl Cpio {
             .remove(&norm_path(from))
             .ok_or_else(|| log_err!("no such entry {}", from))?;
         self.entries.insert(norm_path(to), entry);
-        eprintln!("Move [{}] -> [{}]", from, to);
+        eprintln!("Move [{from}] -> [{to}]");
         Ok(())
     }
 
@@ -498,7 +498,7 @@ impl Cpio {
             if !recursive && !p.is_empty() && p.matches('/').count() > 1 {
                 continue;
             }
-            println!("{}\t{}", entry, name);
+            println!("{entry}\t{name}");
         }
     }
 }
@@ -511,8 +511,7 @@ impl Cpio {
         let keep_verity = check_env("KEEPVERITY");
         let keep_force_encrypt = check_env("KEEPFORCEENCRYPT");
         eprintln!(
-            "Patch with flag KEEPVERITY=[{}] KEEPFORCEENCRYPT=[{}]",
-            keep_verity, keep_force_encrypt
+            "Patch with flag KEEPVERITY=[{keep_verity}] KEEPFORCEENCRYPT=[{keep_force_encrypt}]"
         );
         self.entries.retain(|name, entry| {
             let fstab = (!keep_verity || !keep_force_encrypt)
@@ -523,7 +522,7 @@ impl Cpio {
                 && name.starts_with("fstab");
             if !keep_verity {
                 if fstab {
-                    eprintln!("Found fstab file [{}]", name);
+                    eprintln!("Found fstab file [{name}]");
                     let len = patch_verity(entry.data.as_mut_slice());
                     if len != entry.data.len() {
                         entry.data.resize(len, 0);
@@ -581,7 +580,7 @@ impl Cpio {
                     } else {
                         &name[8..]
                     };
-                    eprintln!("Restore [{}] -> [{}]", name, new_name);
+                    eprintln!("Restore [{name}] -> [{new_name}]");
                     backups.insert(new_name.to_string(), entry);
                 }
             });
@@ -658,16 +657,16 @@ impl Cpio {
             match action {
                 Action::Backup(name, mut entry) => {
                     let backup = if !skip_compress && entry.compress() {
-                        format!(".backup/{}.xz", name)
+                        format!(".backup/{name}.xz")
                     } else {
-                        format!(".backup/{}", name)
+                        format!(".backup/{name}")
                     };
-                    eprintln!("Backup [{}] -> [{}]", name, backup);
+                    eprintln!("Backup [{name}] -> [{backup}]");
                     backups.insert(backup, entry);
                 }
                 Action::Record(name) => {
-                    eprintln!("Record new entry: [{}] -> [.backup/.rmlist]", name);
-                    rm_list.push_str(&format!("{}\0", name));
+                    eprintln!("Record new entry: [{name}] -> [.backup/.rmlist]");
+                    rm_list.push_str(&format!("{name}\0"));
                 }
                 Action::Noop => {}
             }
@@ -696,12 +695,16 @@ impl CpioEntry {
         if self.mode & S_IFMT != S_IFREG {
             return false;
         }
-        let mut compressed = Vec::new();
-        if !xz(&self.data, &mut compressed) {
+        let mut encoder = get_encoder(FileFormat::XZ, Vec::new());
+        let Ok(data): std::io::Result<Vec<u8>> = (try {
+            encoder.write_all(&self.data)?;
+            encoder.finish()?
+        }) else {
             eprintln!("xz compression failed");
             return false;
-        }
-        self.data = compressed;
+        };
+
+        self.data = data;
         true
     }
 
@@ -709,12 +712,17 @@ impl CpioEntry {
         if self.mode & S_IFMT != S_IFREG {
             return false;
         }
-        let mut decompressed = Vec::new();
-        if !unxz(&self.data, &mut decompressed) {
-            eprintln!("xz decompression failed");
+
+        let mut decoder = get_decoder(FileFormat::XZ, Vec::new());
+        let Ok(data): std::io::Result<Vec<u8>> = (try {
+            decoder.write_all(&self.data)?;
+            decoder.finish()?
+        }) else {
+            eprintln!("xz compression failed");
             return false;
-        }
-        self.data = decompressed;
+        };
+
+        self.data = data;
         true
     }
 }
@@ -746,8 +754,7 @@ impl Display for CpioEntry {
             Size::from_bytes(self.data.len())
                 .format()
                 .with_style(Style::Abbreviated)
-                .with_base(Base::Base10)
-                .to_string(),
+                .with_base(Base::Base10),
             self.rdevmajor,
             self.rdevminor,
         )
@@ -755,9 +762,9 @@ impl Display for CpioEntry {
 }
 
 pub fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool {
-    fn inner(argc: i32, argv: *const *const c_char) -> LoggedResult<()> {
+    let res: LoggedResult<()> = try {
         if argc < 1 {
-            return Err(log_err!("No arguments"));
+            Err(log_err!("No arguments"))?;
         }
 
         let cmds = map_args(argc, argv)?;
@@ -766,7 +773,7 @@ pub fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool {
             CpioCli::from_args(&["magiskboot", "cpio"], &cmds).on_early_exit(print_cpio_usage);
 
         let file = Utf8CStr::from_string(&mut cli.file);
-        let mut cpio = if FsPath::from(file).exists() {
+        let mut cpio = if file.exists() {
             Cpio::load_from_file(file)?
         } else {
             Cpio::new()
@@ -807,7 +814,7 @@ pub fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool {
                 CpioAction::Add(Add { mode, path, file }) => cpio.add(*mode, path, file)?,
                 CpioAction::Extract(Extract { paths }) => {
                     if !paths.is_empty() && paths.len() != 2 {
-                        return Err(log_err!("invalid arguments"));
+                        Err(log_err!("invalid arguments"))?;
                     }
                     let mut it = paths.iter_mut();
                     cpio.extract(it.next(), it.next())?;
@@ -819,10 +826,8 @@ pub fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool {
             };
         }
         cpio.dump(file)?;
-        Ok(())
-    }
-    inner(argc, argv)
-        .log_with_msg(|w| w.write_str("Failed to process cpio"))
+    };
+    res.log_with_msg(|w| w.write_str("Failed to process cpio"))
         .is_ok()
 }
 
