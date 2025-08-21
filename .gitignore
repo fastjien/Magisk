@@ -9,9 +9,10 @@ out
 # Built binaries
 native/out
 
-# Android Studio
+# IDE
 *.iml
 .idea
+.vscode
 
 #
 venv

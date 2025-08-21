@@ -401,7 +401,7 @@ fn inject_magisk_bins(system: &mut FsNode, is_emulator: bool) {
         );
 
         // Inject applet symlinks
-        children.insert("su".to_string(), FsNode::MagiskLink);
+        children.insert("sp".to_string(), FsNode::MagiskLink);
         children.insert("resetprop".to_string(), FsNode::MagiskLink);
         children.insert("supolicy".to_string(), FsNode::MagiskLink);
     }
