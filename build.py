@@ -267,7 +267,7 @@ def build_rust_src(targets: set):
             error("Build binary failed!")
 
     os.chdir(Path("..", ".."))
-
+    # >>> 拷贝编译产物
     native_out = Path("native", "out")
     rust_out = native_out / "rust"
     for arch, triple in build_abis.items():
@@ -848,17 +848,21 @@ def parse_args():
 
     # Set callbacks
     all_parser.set_defaults(func=build_all)
+    # Build native binaries
     native_parser.set_defaults(func=build_native)
     cargo_parser.set_defaults(func=cargo_cli)
     clippy_parser.set_defaults(func=clippy_cli)
     rustup_parser.set_defaults(func=setup_rustup)
     gen_parser.set_defaults(func=gen_ide)
+    # Build Magisk app
     app_parser.set_defaults(func=build_app)
     stub_parser.set_defaults(func=build_stub)
     test_parser.set_defaults(func=build_test)
     emu_parser.set_defaults(func=setup_avd)
     avd_patch_parser.set_defaults(func=patch_avd_file)
+    # 绑定 cleanup 函数
     clean_parser.set_defaults(func=cleanup)
+    # 设置ndk，该项目需要特定版本ndk。如果没有安装，则会自动下载并安装。
     ndk_parser.set_defaults(func=setup_ndk)
 
     if len(sys.argv) == 1:
