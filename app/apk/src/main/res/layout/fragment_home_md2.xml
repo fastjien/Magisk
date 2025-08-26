@@ -5,15 +5,15 @@
 
     <data>
 
-        <import type="com.topjohnwu.magisk.core.Info" />
+        <import type="com.fastjien.sunny.core.Info" />
 
-        <import type="com.topjohnwu.magisk.ui.home.DeveloperItem" />
+        <import type="com.fastjien.sunny.ui.home.DeveloperItem" />
 
-        <import type="com.topjohnwu.magisk.ui.home.IconLink" />
+        <import type="com.fastjien.sunny.ui.home.IconLink" />
 
         <variable
             name="viewModel"
-            type="com.topjohnwu.magisk.ui.home.HomeViewModel" />
+            type="com.fastjien.sunny.ui.home.HomeViewModel" />
 
     </data>
 
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:onClick="@{() -> viewModel.onTestPressed()}"
-                android:text="TEST"
+                android:text="@string/test"
                 android:textAllCaps="false"
                 tools:visibility="gone" />
 
@@ -107,14 +107,33 @@
                 android:layout_marginEnd="@dimen/l1"
                 app:layout_constraintTop_toBottomOf="@+id/home_magisk_wrapper" />
 
+            <!-- FIXME 暂时写死 -->
+            <!--            <Space-->
+            <!--                goneUnless="@{Info.env.isActive}"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="@dimen/l1" />-->
             <Space
-                goneUnless="@{Info.env.isActive}"
+                goneUnless="false"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/l1" />
+            <!-- FIXME 暂时写死 -->
+            <!--            <Button-->
+            <!--                style="@style/WidgetFoundation.Button.Outlined.Error"-->
+            <!--                goneUnless="@{Info.env.isActive}"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginStart="@dimen/l1"-->
+            <!--                android:layout_marginEnd="@dimen/l1"-->
+            <!--                android:onClick="@{() -> viewModel.onDeletePressed()}"-->
+            <!--                android:text="@string/uninstall_magisk_title"-->
+            <!--                android:textAllCaps="false"-->
+            <!--                android:textSize="12sp"-->
+            <!--                app:cornerRadius="@dimen/r1"-->
+            <!--                app:icon="@drawable/ic_delete_md2" />-->
 
             <Button
                 style="@style/WidgetFoundation.Button.Outlined.Error"
-                goneUnless="@{Info.env.isActive}"
+                goneUnless="false"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/l1"
@@ -132,8 +151,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_marginStart="@dimen/l1"
-                android:layout_marginEnd="@dimen/l1"
                 android:layout_marginTop="@dimen/l1"
+                android:layout_marginEnd="@dimen/l1"
                 android:focusable="false">
 
                 <LinearLayout
@@ -164,7 +183,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingTop="@dimen/l_50" >
+                        android:paddingTop="@dimen/l_50">
 
                         <include
                             item="@{IconLink.Patreon.INSTANCE}"

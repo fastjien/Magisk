@@ -7,11 +7,11 @@
 
         <variable
             name="item"
-            type="com.topjohnwu.magisk.ui.settings.BaseSettingsItem" />
+            type="com.fastjien.sunny.ui.settings.BaseSettingsItem" />
 
         <variable
             name="handler"
-            type="com.topjohnwu.magisk.ui.settings.BaseSettingsItem.Handler" />
+            type="com.fastjien.sunny.ui.settings.BaseSettingsItem.Handler" />
 
     </data>
 

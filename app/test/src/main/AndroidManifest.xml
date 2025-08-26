@@ -13,11 +13,11 @@
     </application>
 
     <instrumentation
-        android:name="com.topjohnwu.magisk.test.AppTestRunner"
-        android:targetPackage="com.topjohnwu.magisk" />
+        android:name="com.fastjien.sunny.test.AppTestRunner"
+        android:targetPackage="com.fastjien.sunny" />
 
     <instrumentation
-        android:name="com.topjohnwu.magisk.test.TestRunner"
-        android:targetPackage="com.topjohnwu.magisk.test" />
+        android:name="com.fastjien.sunny.test.TestRunner"
+        android:targetPackage="com.fastjien.sunny.test" />
 
 </manifest>

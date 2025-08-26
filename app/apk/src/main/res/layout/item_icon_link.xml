@@ -7,11 +7,11 @@
 
         <variable
             name="item"
-            type="com.topjohnwu.magisk.ui.home.IconLink" />
+            type="com.fastjien.sunny.ui.home.IconLink" />
 
         <variable
             name="viewModel"
-            type="com.topjohnwu.magisk.ui.home.HomeViewModel" />
+            type="com.fastjien.sunny.ui.home.HomeViewModel" />
 
     </data>
 

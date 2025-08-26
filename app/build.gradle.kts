@@ -9,3 +9,7 @@ tasks.register("clean", Delete::class) {
         dependsOn(":${it.name}:clean")
     }
 }
+
+tasks.matching { it.name == "generateDebugLintReportModel" }.configureEach {
+    dependsOn("downloadDebugLsposed")
+}

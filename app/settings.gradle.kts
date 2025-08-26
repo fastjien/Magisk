@@ -10,9 +10,16 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://jitpack.io")
+        maven("https://maven.aliyun.com/repository/public")
     }
 }
-// 设置根项目名称为 Magisk ，影响 Gradle 项目在构建日志、IDE 里的显示名称。
-rootProject.name = "Magisk"
-// 声明项目包含的子模块，这里有 :apk（可能是 App 主模块 ）、:core（核心逻辑 ）、:shared（公共代码 ）、:stub（占位 / 存根模块 ）、:test（测试模块 ）。Gradle 会根据这些声明，加载对应模块的 build.gradle.kts 配置，实现多模块构建。
+// 设置根项目名称为 Sunny ，影响 Gradle 项目在构建日志、IDE 里的显示名称。
+rootProject.name = "Sunny"
+// 声明项目包含的子模块，这里有
+// * :apk（可能是 App 主模块 ）、
+// * :core（核心逻辑 ）、
+// * :shared（公共代码 ）、
+// * :stub（占位 / 存根模块 ）、
+// * :test（测试模块 ）。
+// Gradle 会根据这些声明，加载对应模块的 build.gradle.kts 配置，实现多模块构建。
 include(":apk", ":core", ":shared", ":stub", ":test")

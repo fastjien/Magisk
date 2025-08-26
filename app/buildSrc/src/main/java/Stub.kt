@@ -78,7 +78,7 @@ private fun PrintStream.byteField(name: String, bytes: ByteArray) {
 }
 
 @CacheableTask
-private abstract class ManifestUpdater: DefaultTask() {
+private abstract class ManifestUpdater : DefaultTask() {
     @get:Input
     abstract val applicationId: Property<String>
 
@@ -103,7 +103,8 @@ private abstract class ManifestUpdater: DefaultTask() {
 
         val cmpList = mutableListOf<String>()
 
-        cmpList.add("""
+        cmpList.add(
+            """
             |<provider
             |    android:name="x.COMPONENT_PLACEHOLDER_0"
             |    android:authorities="${'$'}{applicationId}.provider"
@@ -112,7 +113,8 @@ private abstract class ManifestUpdater: DefaultTask() {
             |    android:grantUriPermissions="true" />""".ind(2)
         )
 
-        cmpList.add("""
+        cmpList.add(
+            """
             |<receiver
             |    android:name="x.COMPONENT_PLACEHOLDER_1"
             |    android:exported="false">
@@ -130,7 +132,8 @@ private abstract class ManifestUpdater: DefaultTask() {
             |</receiver>""".ind(2)
         )
 
-        cmpList.add("""
+        cmpList.add(
+            """
             |<activity
             |    android:name="x.COMPONENT_PLACEHOLDER_2"
             |    android:exported="true">
@@ -141,7 +144,8 @@ private abstract class ManifestUpdater: DefaultTask() {
             |</activity>""".ind(2)
         )
 
-        cmpList.add("""
+        cmpList.add(
+            """
             |<activity
             |    android:name="x.COMPONENT_PLACEHOLDER_3"
             |    android:directBootAware="true"
@@ -154,14 +158,16 @@ private abstract class ManifestUpdater: DefaultTask() {
             |</activity>""".ind(2)
         )
 
-        cmpList.add("""
+        cmpList.add(
+            """
             |<service
             |    android:name="x.COMPONENT_PLACEHOLDER_4"
             |    android:exported="false"
             |    android:foregroundServiceType="dataSync" />""".ind(2)
         )
 
-        cmpList.add("""
+        cmpList.add(
+            """
             |<service
             |    android:name="x.COMPONENT_PLACEHOLDER_5"
             |    android:exported="false"
@@ -178,7 +184,8 @@ private abstract class ManifestUpdater: DefaultTask() {
         }
         val components = cmpList.joinToString("\n\n")
             .replace("\${applicationId}", applicationId.get())
-        val manifest = mergedManifest.asFile.get().readText().replace(Regex(".*\\<application"), """
+        val manifest = mergedManifest.asFile.get().readText().replace(
+            Regex(".*\\<application"), """
             |<application
             |    android:appComponentFactory="$factoryPkg.$factoryClass"
             |    android:name="$appPkg.$appClass"""".ind(1)
@@ -224,7 +231,7 @@ private fun genStubClasses(factoryOutDir: File, appOutDir: File) {
         pkgDir.mkdirs()
         PrintStream(File(pkgDir, "$name.java")).use {
             it.println("package $pkg;")
-            it.println("public class $name extends com.topjohnwu.magisk.$type {}")
+            it.println("public class $name extends com.fastjien.sunny.$type {}")
         }
     }
 
@@ -253,7 +260,7 @@ private fun genEncryptedResources(res: ByteArray, outDir: File) {
     }
 
     PrintStream(File(mainPkgDir, "Bytes.java")).use {
-        it.println("package com.topjohnwu.magisk;")
+        it.println("package com.fastjien.sunny;")
         it.println("public final class Bytes {")
 
         it.byteField("key", key)
@@ -280,19 +287,26 @@ fun Project.setupStubApk() {
         variant.artifacts.use(manifestUpdater)
             .wiredWithFiles(
                 ManifestUpdater::mergedManifest,
-                ManifestUpdater::outputManifest)
+                ManifestUpdater::outputManifest
+            )
             .toTransform(SingleArtifact.MERGED_MANIFEST)
     }
 
     androidApp.applicationVariants.all {
         val variantCapped = name.replaceFirstChar { it.uppercase() }
         val variantLowered = name.lowercase()
-        val outFactoryClassDir = layout.buildDirectory.file("generated/source/factory/${variantLowered}").get().asFile
-        val outAppClassDir = layout.buildDirectory.file("generated/source/app/${variantLowered}").get().asFile
-        val outResDir = layout.buildDirectory.dir("generated/source/res/${variantLowered}").get().asFile
-        val aapt = File(androidApp.sdkDirectory, "build-tools/${androidApp.buildToolsVersion}/aapt2")
-        val apk = layout.buildDirectory.file("intermediates/linked_resources_binary_format/" +
-                "${variantLowered}/process${variantCapped}Resources/linked-resources-binary-format-${variantLowered}.ap_").get().asFile
+        val outFactoryClassDir =
+            layout.buildDirectory.file("generated/source/factory/${variantLowered}").get().asFile
+        val outAppClassDir =
+            layout.buildDirectory.file("generated/source/app/${variantLowered}").get().asFile
+        val outResDir =
+            layout.buildDirectory.dir("generated/source/res/${variantLowered}").get().asFile
+        val aapt =
+            File(androidApp.sdkDirectory, "build-tools/${androidApp.buildToolsVersion}/aapt2")
+        val apk = layout.buildDirectory.file(
+            "intermediates/linked_resources_binary_format/" +
+                    "${variantLowered}/process${variantCapped}Resources/linked-resources-binary-format-${variantLowered}.ap_"
+        ).get().asFile
 
         val genManifestTask = tasks.register("generate${variantCapped}ObfuscatedClass") {
             inputs.property("seed", RAND_SEED)
@@ -333,10 +347,14 @@ fun Project.setupStubApk() {
         registerJavaGeneratingTask(processResourcesTask, outResDir)
     }
     // Override optimizeReleaseResources task
-    val apk = layout.buildDirectory.file("intermediates/linked_resources_binary_format/" +
-            "release/processReleaseResources/linked-resources-binary-format-release.ap_").get().asFile
-    val optRes = layout.buildDirectory.file("intermediates/optimized_processed_res/" +
-            "release/optimizeReleaseResources/resources-release-optimize.ap_").get().asFile
+    val apk = layout.buildDirectory.file(
+        "intermediates/linked_resources_binary_format/" +
+                "release/processReleaseResources/linked-resources-binary-format-release.ap_"
+    ).get().asFile
+    val optRes = layout.buildDirectory.file(
+        "intermediates/optimized_processed_res/" +
+                "release/optimizeReleaseResources/resources-release-optimize.ap_"
+    ).get().asFile
     afterEvaluate {
         tasks.named("optimizeReleaseResources") {
             doLast { apk.copyTo(optRes, true) }

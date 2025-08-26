@@ -5,11 +5,11 @@
 
     <data>
 
-        <import type="com.topjohnwu.magisk.ui.home.HomeViewModel.State" />
+        <import type="com.fastjien.sunny.ui.home.HomeViewModel.State" />
 
         <variable
             name="viewModel"
-            type="com.topjohnwu.magisk.ui.home.HomeViewModel" />
+            type="com.fastjien.sunny.ui.home.HomeViewModel" />
 
     </data>
 
@@ -34,7 +34,8 @@
                 android:padding="@dimen/l_50"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_manager" />
+                app:srcCompat="@drawable/ic_manager"
+                android:contentDescription="@null" />
 
             <TextView
                 android:id="@+id/home_manager_title"
@@ -157,7 +158,7 @@
                                 android:id="@+id/home_manager_extra_connection_value"
                                 style="@style/W.Home.ItemContent.Right"
                                 android:text="@{context.packageName}"
-                                tools:text="com.topjohnwu.magisk" />
+                                tools:text="com.fastjien.sunny" />
 
                         </LinearLayout>
 

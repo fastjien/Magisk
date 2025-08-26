@@ -4,10 +4,10 @@ plugins {
 }
 
 android {
-    namespace = "com.topjohnwu.magisk.test"
+    namespace = "com.fastjien.sunny.test"
 
     defaultConfig {
-        applicationId = "com.topjohnwu.magisk.test"
+        applicationId = "com.fastjien.sunny.test"
         versionCode = 1
         versionName = "1.0"
         proguardFile("proguard-rules.pro")
@@ -27,4 +27,12 @@ dependencies {
     implementation(libs.test.rules)
     implementation(libs.test.junit)
     implementation(libs.test.uiautomator)
+}
+
+tasks.matching { it.name == "generateDebugLintReportModel" }.configureEach {
+    dependsOn("downloadDebugLsposed")
+}
+
+tasks.matching { it.name == "lintAnalyzeDebug" }.configureEach {
+    dependsOn("downloadDebugLsposed")
 }

@@ -27,3 +27,7 @@ dependencies {
     implementation(libs.moshi.plugin)
     implementation(libs.jgit)
 }
+
+tasks.matching { it.name == "generateDebugLintReportModel" }.configureEach {
+    dependsOn("downloadDebugLsposed")
+}

@@ -8,6 +8,7 @@
     <string name="install">ਇੰਸਟਾਲ</string>
     <string name="section_home">ਹੋਮ</string>
     <string name="section_theme">ਥੀਮ</string>
+    <string name="denylist">DenyList</string>
 
     <!--Home-->
     <string name="no_connection">ਕੋਈ ਸੰਪਰਕ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
@@ -17,6 +18,9 @@
     <string name="not_available">N/A</string>
     <string name="hide">ਓਹਲੇ</string>
     <string name="home_package">ਪੈਕੇਜ</string>
+    <string name="home_app_title">App</string>
+    <string name="home_notice_content">Download Magisk ONLY from the official GitHub page. Files from unknown sources can be malicious!</string>
+    <string name="home_follow_title">Follow Us</string>
 
     <string name="home_support_title">ਸਾਡਾ ਸਮਰਥਨ ਕਰੋ</string>
     <string name="home_item_source">ਸਰੋਤ</string>
@@ -73,6 +77,8 @@
     <string name="superuser_toggle_notification">ਸੂਚਨਾ</string>
     <string name="superuser_toggle_revoke">ਅਧਿਕਾਰ ਵਾਪਸ ਲਓ</string>
     <string name="superuser_policy_none">ਅਜੇ ਤੱਕ ਕਿਸੇ ਵੀ ਐਪ ਨੇ ਸੁਪਰਯੂਜ਼ਰ ਲਈ ਆਗਿਆ ਨਹੀਂ ਮੰਗੀ ਹੈ।</string>
+    <string name="touch_filtered_warning">Because an app is obscuring a Superuser request, Magisk can\'t verify your response.</string>
+    <string name="restrict">Restrict</string>
 
     <!--Logs-->
     <string name="log_data_none">ਕੋਈ ਲੌਗਸ ਨਹੀਂ, ਆਪਣੀ ਸੁਪਰਯੂਜ਼ਰ ਸਮਰਥਿਤ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਹੋਰ ਵਰਤਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
@@ -82,6 +88,9 @@
     <string name="logs_cleared">ਲੌਗ ਸਫਲਤਾਪੂਰਕ ਸਾਫ ਹੋ ਗਏ ਹਨ।</string>
     <string name="pid">PID: %1$d</string>
     <string name="target_uid">ਟੀਚਾ UID: %1$d</string>
+    <string name="target_pid">Target PID: %s</string>
+    <string name="selinux_context">SELinux context: %s</string>
+    <string name="supp_group">Supplementary group: %s</string>
 
     <!--SafetyNet-->
 
@@ -103,6 +112,14 @@
     <string name="module_state_restore">ਰੀਸਟੋਰ ਕਰੋ</string>
     <string name="module_action_install_external">ਸਟੋਰੇਜ ਤੋਂ ਇੰਸਟਾਲ ਕਰੋ</string>
     <string name="update_available">ਅਪਡੇਟ ਉਪਲੱਬਧ ਹੈ</string>
+    <string name="reboot_safe_mode">Safe mode</string>
+    <string name="module_action">Action</string>
+    <string name="suspend_text_riru">Module suspended because %1$s is enabled</string>
+    <string name="suspend_text_zygisk">Module suspended because %1$s isn\'t enabled</string>
+    <string name="zygisk_module_unloaded">Zygisk module not loaded due to incompatibility</string>
+    <string name="module_empty">No module installed</string>
+    <string name="confirm_install">Install module %1$s?</string>
+    <string name="confirm_install_title">Install confirmation</string>
 
     <!--Settings -->
     <string name="settings_dark_mode_title">ਥੀਮ ਮੋਡ</string>

@@ -1,4 +1,3 @@
-
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -26,12 +25,13 @@ object Config {
     fun contains(key: String) = get(key) != null
 
     val version: String get() = get("version") ?: commitHash
-    val versionCode: Int get() = get("magisk.versionCode")!!.toInt()
-    val stubVersion: String get() = get("magisk.stubVersion")!!
-    val abiList: Set<String> get() {
-        val abiList = get("abiList") ?: return defaultAbis
-        return abiList.split(Regex("\\s*,\\s*")).toSet() intersect supportAbis
-    }
+    val versionCode: Int get() = get("sunny.versionCode")!!.toInt()
+    val stubVersion: String get() = get("sunny.stubVersion")!!
+    val abiList: Set<String>
+        get() {
+            val abiList = get("abiList") ?: return defaultAbis
+            return abiList.split(Regex("\\s*,\\s*")).toSet() intersect supportAbis
+        }
 }
 
 fun Project.rootFile(path: String): File {

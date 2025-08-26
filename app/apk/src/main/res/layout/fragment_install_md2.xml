@@ -5,13 +5,13 @@
 
     <data>
 
-        <import type="com.topjohnwu.magisk.core.Info" />
+        <import type="com.fastjien.sunny.core.Info" />
 
-        <import type="com.topjohnwu.magisk.core.Config" />
+        <import type="com.fastjien.sunny.core.Config" />
 
         <variable
             name="viewModel"
-            type="com.topjohnwu.magisk.ui.install.InstallViewModel" />
+            type="com.fastjien.sunny.ui.install.InstallViewModel" />
 
     </data>
 
@@ -107,10 +107,19 @@
                             android:checked="@={Config.keepEnc}"
                             android:text="@string/keep_force_encryption"
                             app:tint="?colorPrimary" />
+                        <!-- FIXME 暂时写死 -->
+                        <!--                        <CheckBox-->
+                        <!--                            style="@style/WidgetFoundation.Checkbox"-->
+                        <!--                            gone="@{Info.ramdisk}"-->
+                        <!--                            android:layout_width="match_parent"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:checked="@={Config.recovery}"-->
+                        <!--                            android:text="@string/recovery_mode"-->
+                        <!--                            app:tint="?colorPrimary" />-->
 
                         <CheckBox
                             style="@style/WidgetFoundation.Checkbox"
-                            gone="@{Info.ramdisk}"
+                            gone="@string/no"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="@={Config.recovery}"

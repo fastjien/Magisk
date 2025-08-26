@@ -7,7 +7,7 @@
 
         <variable
             name="data"
-            type="com.topjohnwu.magisk.ui.settings.DownloadPath" />
+            type="com.fastjien.sunny.ui.settings.DownloadPath" />
 
     </data>
 

@@ -9,7 +9,6 @@ import org.apache.tools.ant.filters.FixCrLfFilter
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.Sync
@@ -24,16 +23,10 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
 import java.security.MessageDigest
 import java.util.HexFormat
-import java.util.zip.Deflater
-import java.util.zip.DeflaterOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
 
 private fun Project.androidBase(configure: Action<BaseExtension>) =
     extensions.configure("android", configure)
@@ -132,22 +125,33 @@ fun Project.setupCoreLib() {
         val abiList = Config.abiList
 
         val syncLibs = tasks.register("sync${variantCapped}JniLibs", Sync::class) {
+            doFirst {
+                if (inputs.sourceFiles.files.size != abiList.size * 6) {
+                    throw StopExecutionException("Please build binaries first! (./build.py binary)")
+                }
+            }
+//            onlyIf {
+//                if (inputs.sourceFiles.files.size != abiList.size * 6)
+//                    throw StopExecutionException("Please build binaries first! (./build.py binary)")
+//                true
+//            }
             into("src/$variant/jniLibs")
             for (abi in abiList) {
                 into(abi) {
                     from(rootFile("native/out/$abi")) {
-                        include("magiskboot", "magiskinit", "magiskpolicy", "magisk", "libinit-ld.so")
+                        include(
+                            "magiskboot",
+                            "magiskinit",
+                            "magiskpolicy",
+                            "magisk",
+                            "libinit-ld.so"
+                        )
                         rename { if (it.endsWith(".so")) it else "lib$it.so" }
                     }
                 }
             }
             from(zipTree(downloadFile(BUSYBOX_DOWNLOAD_URL, BUSYBOX_ZIP_CHECKSUM)))
             include(abiList.map { "$it/libbusybox.so" })
-            onlyIf {
-                if (inputs.sourceFiles.files.size != abiList.size * 6)
-                    throw StopExecutionException("Please build binaries first! (./build.py binary)")
-                true
-            }
         }
 
         tasks.getByPath("merge${variantCapped}JniLibFolders").dependsOn(syncLibs)
@@ -175,8 +179,10 @@ fun Project.setupCoreLib() {
             inputs.property("versionCode", Config.versionCode)
             into("src/$variant/assets")
             from(rootFile("scripts")) {
-                include("util_functions.sh", "boot_patch.sh", "addon.d.sh",
-                    "app_functions.sh", "uninstaller.sh", "module_installer.sh")
+                include(
+                    "util_functions.sh", "boot_patch.sh", "addon.d.sh",
+                    "app_functions.sh", "uninstaller.sh", "module_installer.sh"
+                )
             }
             from(rootFile("tools/bootctl"))
             into("chromeos") {
@@ -267,8 +273,8 @@ fun Project.setupAppCommon() {
             this.transformationRequest = transformationRequest
             this.signingConfig = signingConfig
             this.comment = "version=${Config.version}\n" +
-                "versionCode=${Config.versionCode}\n" +
-                "stubVersion=${Config.stubVersion}\n"
+                    "versionCode=${Config.versionCode}\n" +
+                    "stubVersion=${Config.stubVersion}\n"
             this.outFolder.set(layout.buildDirectory.dir("outputs/apk/${variant.name}"))
         }
     }
@@ -278,10 +284,10 @@ fun Project.setupMainApk() {
     setupAppCommon()
 
     android {
-        namespace = "com.topjohnwu.magisk"
+        namespace = "com.fastjien.sunny"
 
         defaultConfig {
-            applicationId = "com.topjohnwu.magisk"
+            applicationId = "com.fastjien.sunny"
             vectorDrawables.useSupportLibrary = true
             versionName = Config.version
             versionCode = Config.versionCode
@@ -295,7 +301,8 @@ fun Project.setupMainApk() {
             variant.instrumentation.apply {
                 setAsmFramesComputationMode(COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
                 transformClassesWith(
-                    DesugarClassVisitorFactory::class.java, InstrumentationScope.ALL) {}
+                    DesugarClassVisitorFactory::class.java, InstrumentationScope.ALL
+                ) {}
             }
         }
     }
