@@ -140,7 +140,7 @@ cp -af ./magiskboot $MAGISKBIN/magiskboot
 cp -af ./magiskinit $MAGISKBIN/magiskinit
 cp -af ./busybox $MAGISKBIN/busybox
 
-ln -s ./magisk $MAGISKTMP/sp
+ln -s ./magisk $MAGISKTMP/op
 ln -s ./magisk $MAGISKTMP/resetprop
 ln -s ./magiskpolicy $MAGISKTMP/supolicy
 
