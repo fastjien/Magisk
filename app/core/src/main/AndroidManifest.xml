@@ -12,10 +12,10 @@
         tools:node="remove" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
+    <!--        android:icon="@drawable/ic_launcher"-->
     <application
         android:name=".App"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         tools:ignore="UnusedAttribute,GoogleAppIndexingWarning"
         tools:remove="android:appComponentFactory">
 
