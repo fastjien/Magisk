@@ -1,20 +1,33 @@
 [package]
-name = "magiskpolicy"
+# 项目名称，作为 crate 的唯一标识
+name = "sunnypolicy"
+# 版本号继承自工作区根配置（避免在子 crate 中重复定义）
 version.workspace = true
+# Rust 版本（如 2021）继承自工作区根配置
 edition.workspace = true
 
 [lib]
+# 编译输出类型：
+# - staticlib：静态链接库（供其他语言或 Rust 外部调用）
+# - rlib：Rust 专用的静态库（供其他 Rust crate 链接）
 crate-type = ["staticlib", "rlib"]
+  # 库的入口源代码文件（默认是 src/lib.rs，这里显式指定）
 path = "lib.rs"
 
 [build-dependencies]
+# 依赖 `cxx-gen`，版本和配置继承自工作区；通常用于 C++/Rust 互操作的代码生成
 cxx-gen = { workspace = true }
 
 [features]
+# 默认启用 "main" 特性
 default = ["main"]
+# 一个空特性（可能用于条件编译主程序入口，暂无具体依赖）
 main = []
 
 [dependencies]
+# 依赖本地路径 `../base` 的 crate（项目内的子模块）
 base = { path = "../base" }
+# 依赖 `cxx`（C++/Rust 互操作库），配置继承自工作区
 cxx = { workspace = true }
+# 依赖 `argh`（命令行参数解析库），配置继承自工作区
 argh = { workspace = true }

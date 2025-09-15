@@ -7,7 +7,7 @@ import com.fastjien.sunny.core.download.DownloadEngine
 import com.fastjien.sunny.core.download.Subject
 import com.fastjien.sunny.core.model.module.OnlineModule
 import com.fastjien.sunny.ui.flash.FlashFragment
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import com.fastjien.sunny.view.Notifications
 import kotlinx.parcelize.Parcelize
 
@@ -29,7 +29,7 @@ class OnlineModuleInstallDialog(private val item: OnlineModule) : MarkDownDialog
         override fun pendingIntent(context: Context) = FlashFragment.installIntent(context, file)
     }
 
-    override fun build(dialog: MagiskDialog) {
+    override fun build(dialog: SunnyDialog) {
         super.build(dialog)
         dialog.apply {
 
@@ -42,15 +42,15 @@ class OnlineModuleInstallDialog(private val item: OnlineModule) : MarkDownDialog
 
             setTitle(title)
             setCancelable(true)
-            setButton(MagiskDialog.ButtonType.NEGATIVE) {
+            setButton(SunnyDialog.ButtonType.NEGATIVE) {
                 text = R.string.download
                 onClick { download(false) }
             }
-            setButton(MagiskDialog.ButtonType.POSITIVE) {
+            setButton(SunnyDialog.ButtonType.POSITIVE) {
                 text = R.string.install
                 onClick { download(true) }
             }
-            setButton(MagiskDialog.ButtonType.NEUTRAL) {
+            setButton(SunnyDialog.ButtonType.NEUTRAL) {
                 text = android.R.string.cancel
             }
         }

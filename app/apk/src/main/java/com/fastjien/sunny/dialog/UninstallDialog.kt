@@ -7,23 +7,23 @@ import com.fastjien.sunny.arch.NavigationActivity
 import com.fastjien.sunny.arch.UIActivity
 import com.fastjien.sunny.core.R
 import com.fastjien.sunny.core.ktx.toast
-import com.fastjien.sunny.core.tasks.MagiskInstaller
+import com.fastjien.sunny.core.tasks.SunnyInstaller
 import com.fastjien.sunny.events.DialogBuilder
 import com.fastjien.sunny.ui.flash.FlashFragment
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import kotlinx.coroutines.launch
 
 class UninstallDialog : DialogBuilder {
 
-    override fun build(dialog: MagiskDialog) {
+    override fun build(dialog: SunnyDialog) {
         dialog.apply {
-            setTitle(R.string.uninstall_magisk_title)
-            setMessage(R.string.uninstall_magisk_msg)
-            setButton(MagiskDialog.ButtonType.POSITIVE) {
+            setTitle(R.string.uninstall_sunny_title)
+            setMessage(R.string.uninstall_sunny_msg)
+            setButton(SunnyDialog.ButtonType.POSITIVE) {
                 text = R.string.restore_img
                 onClick { restore(dialog.activity) }
             }
-            setButton(MagiskDialog.ButtonType.NEGATIVE) {
+            setButton(SunnyDialog.ButtonType.NEGATIVE) {
                 text = R.string.complete_uninstall
                 onClick { completeUninstall(dialog) }
             }
@@ -38,7 +38,7 @@ class UninstallDialog : DialogBuilder {
         }
 
         activity.lifecycleScope.launch {
-            MagiskInstaller.Restore().exec { success ->
+            SunnyInstaller.Restore().exec { success ->
                 dialog.dismiss()
                 if (success) {
                     activity.toast(R.string.restore_done, Toast.LENGTH_SHORT)
@@ -49,7 +49,7 @@ class UninstallDialog : DialogBuilder {
         }
     }
 
-    private fun completeUninstall(dialog: MagiskDialog) {
+    private fun completeUninstall(dialog: SunnyDialog) {
         (dialog.ownerActivity as NavigationActivity<*>)
             .navigation.navigate(FlashFragment.uninstall())
     }

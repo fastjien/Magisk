@@ -9,7 +9,7 @@ use crate::ffi::SuRequest;
 use crate::socket::Encodable;
 use base::libc;
 use cxx::{ExternType, type_id};
-use daemon::{MagiskD, daemon_entry};
+use daemon::{SunnyD, daemon_entry};
 use derive::Decodable;
 use logging::{android_logging, setup_logfile, zygisk_close_logd, zygisk_get_logd, zygisk_logging};
 use module::remove_modules;
@@ -109,7 +109,7 @@ pub mod ffi {
         ProcessGrantedRoot = 0x00000001,
         ProcessOnDenyList = 0x00000002,
         DenyListEnforced = 0x40000000,
-        ProcessIsMagiskApp = 0x80000000,
+        ProcessIsSunnyApp = 0x80000000,
     }
 
     #[derive(Decodable)]
@@ -134,11 +134,11 @@ pub mod ffi {
 
         include!("include/core.hpp");
 
-        #[cxx_name = "get_magisk_tmp_rs"]
-        fn get_magisk_tmp() -> Utf8CStrRef<'static>;
+        #[cxx_name = "get_sunny_tmp_rs"]
+        fn get_sunny_tmp() -> Utf8CStrRef<'static>;
         #[cxx_name = "resolve_preinit_dir_rs"]
         fn resolve_preinit_dir(base_dir: Utf8CStrRef) -> String;
-        fn setup_magisk_env() -> bool;
+        fn setup_sunny_env() -> bool;
         fn check_key_combo() -> bool;
         #[cxx_name = "exec_script_rs"]
         fn exec_script(script: Utf8CStrRef);
@@ -219,9 +219,9 @@ pub mod ffi {
         fn default() -> SuRequest;
     }
 
-    // FFI for MagiskD
+    // FFI for SunnyD
     extern "Rust" {
-        type MagiskD;
+        type SunnyD;
         fn reboot(&self);
         fn sdk_int(&self) -> i32;
         fn zygisk_enabled(&self) -> bool;
@@ -239,9 +239,9 @@ pub mod ffi {
         #[cxx_name = "db_exec"]
         fn db_exec_for_cxx(&self, client_fd: i32);
 
-        #[Self = MagiskD]
+        #[Self = SunnyD]
         #[cxx_name = "Get"]
-        fn get() -> &'static MagiskD;
+        fn get() -> &'static SunnyD;
     }
 }
 

@@ -34,7 +34,7 @@ import com.fastjien.sunny.core.tasks.AppMigration
 import com.fastjien.sunny.databinding.ActivityMainMd2Binding
 import com.fastjien.sunny.ui.home.HomeFragmentDirections
 import com.fastjien.sunny.ui.theme.Theme
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import com.fastjien.sunny.view.Shortcuts
 import kotlinx.coroutines.launch
 import java.io.File
@@ -190,10 +190,10 @@ class MainActivity : NavigationActivity<ActivityMainMd2Binding>(), SplashScreenH
 
     @SuppressLint("InlinedApi")
     override fun showInvalidStateMessage(): Unit = runOnUiThread {
-        MagiskDialog(this).apply {
+        SunnyDialog(this).apply {
             setTitle(CoreR.string.unsupport_nonroot_stub_title)
             setMessage(CoreR.string.unsupport_nonroot_stub_msg)
-            setButton(MagiskDialog.ButtonType.POSITIVE) {
+            setButton(SunnyDialog.ButtonType.POSITIVE) {
                 text = CoreR.string.install
                 onClick {
                     withPermission(REQUEST_INSTALL_PACKAGES) {
@@ -215,40 +215,40 @@ class MainActivity : NavigationActivity<ActivityMainMd2Binding>(), SplashScreenH
 
     private fun showUnsupportedMessage() {
         if (Info.env.isUnsupported) {
-            MagiskDialog(this).apply {
-                setTitle(CoreR.string.unsupport_magisk_title)
-                setMessage(CoreR.string.unsupport_magisk_msg, Const.Version.MIN_VERSION)
-                setButton(MagiskDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
+            SunnyDialog(this).apply {
+                setTitle(CoreR.string.unsupport_sunny_title)
+                setMessage(CoreR.string.unsupport_sunny_msg, Const.Version.MIN_VERSION)
+                setButton(SunnyDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
                 setCancelable(false)
             }.show()
         }
 
         if (!Info.isEmulator && Info.env.isActive && System.getenv("PATH")
                 ?.split(':')
-                ?.filterNot { File("$it/magisk").exists() }
+                ?.filterNot { File("$it/sunny").exists() }
                 ?.any { File("$it/su").exists() } == true) {
-            MagiskDialog(this).apply {
+            SunnyDialog(this).apply {
                 setTitle(CoreR.string.unsupport_general_title)
                 setMessage(CoreR.string.unsupport_other_su_msg)
-                setButton(MagiskDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
+                setButton(SunnyDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
                 setCancelable(false)
             }.show()
         }
 
         if (applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0) {
-            MagiskDialog(this).apply {
+            SunnyDialog(this).apply {
                 setTitle(CoreR.string.unsupport_general_title)
                 setMessage(CoreR.string.unsupport_system_app_msg)
-                setButton(MagiskDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
+                setButton(SunnyDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
                 setCancelable(false)
             }.show()
         }
 
         if (applicationInfo.flags and ApplicationInfo.FLAG_EXTERNAL_STORAGE != 0) {
-            MagiskDialog(this).apply {
+            SunnyDialog(this).apply {
                 setTitle(CoreR.string.unsupport_general_title)
                 setMessage(CoreR.string.unsupport_external_storage_msg)
-                setButton(MagiskDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
+                setButton(SunnyDialog.ButtonType.POSITIVE) { text = android.R.string.ok }
                 setCancelable(false)
             }.show()
         }
@@ -259,13 +259,13 @@ class MainActivity : NavigationActivity<ActivityMainMd2Binding>(), SplashScreenH
             ShortcutManagerCompat.isRequestPinShortcutSupported(this)) {
             // Ask and show dialog
             Config.askedHome = true
-            MagiskDialog(this).apply {
+            SunnyDialog(this).apply {
                 setTitle(CoreR.string.add_shortcut_title)
                 setMessage(CoreR.string.add_shortcut_msg)
-                setButton(MagiskDialog.ButtonType.NEGATIVE) {
+                setButton(SunnyDialog.ButtonType.NEGATIVE) {
                     text = android.R.string.cancel
                 }
-                setButton(MagiskDialog.ButtonType.POSITIVE) {
+                setButton(SunnyDialog.ButtonType.POSITIVE) {
                     text = android.R.string.ok
                     onClick {
                         Shortcuts.addHomeIcon(this@MainActivity)

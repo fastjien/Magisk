@@ -1,11 +1,11 @@
 use crate::consts::{PREINITMIRR, SELINUXMOCK};
-use crate::ffi::{MagiskInit, preload_ack, preload_lib, preload_policy, split_plat_cil};
+use crate::ffi::{SunnyInit, preload_ack, preload_lib, preload_policy, split_plat_cil};
 use base::const_format::concatcp;
 use base::{
     BytesExt, LibcReturn, LoggedResult, MappedFile, ResultExt, Utf8CStr, cstr, debug, error, info,
     libc, raw_cstr,
 };
-use magiskpolicy::ffi::SePolicy;
+use sunnypolicy::ffi::SePolicy;
 use std::io::{Read, Write};
 use std::ptr;
 use std::thread::sleep;
@@ -58,7 +58,7 @@ fn mock_file(target: &Utf8CStr, mock: &Utf8CStr) -> LoggedResult<()> {
     mock.bind_mount_to(target, false).log()
 }
 
-impl MagiskInit {
+impl SunnyInit {
     pub(crate) fn handle_sepolicy(&mut self) {
         self.handle_sepolicy_impl().ok();
     }
@@ -71,7 +71,7 @@ impl MagiskInit {
         SELINUX_REQPROT.unmount().ok();
 
         let mut sepol = SePolicy::from_file(MOCK_LOAD);
-        sepol.magisk_rules();
+        sepol.sunny_rules();
         sepol.load_rules(rules);
         sepol.to_file(SELINUX_LOAD);
 
@@ -226,7 +226,7 @@ impl MagiskInit {
                 preload_policy().remove()?;
                 preload_ack().remove()?;
 
-                sepol.magisk_rules();
+                sepol.sunny_rules();
                 sepol.load_rules(&rules);
                 sepol.to_file(SELINUX_LOAD);
 

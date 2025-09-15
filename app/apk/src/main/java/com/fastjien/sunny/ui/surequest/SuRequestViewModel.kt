@@ -21,7 +21,7 @@ import com.fastjien.sunny.arch.BaseViewModel
 import com.fastjien.sunny.core.AppContext
 import com.fastjien.sunny.core.Config
 import com.fastjien.sunny.core.R
-import com.fastjien.sunny.core.data.magiskdb.PolicyDao
+import com.fastjien.sunny.core.data.sunnydb.PolicyDao
 import com.fastjien.sunny.core.ktx.getLabel
 import com.fastjien.sunny.core.ktx.toast
 import com.fastjien.sunny.core.model.su.SuPolicy.Companion.ALLOW
@@ -60,7 +60,8 @@ class SuRequestViewModel(
     val grantTouchListener = View.OnTouchListener { _: View, event: MotionEvent ->
         // Filter obscured touches by consuming them.
         if (event.flags and MotionEvent.FLAG_WINDOW_IS_OBSCURED != 0
-            || event.flags and MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED != 0) {
+            || event.flags and MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED != 0
+        ) {
             if (event.action == MotionEvent.ACTION_UP) {
                 AppContext.toast(R.string.touch_filtered_warning, Toast.LENGTH_SHORT)
             }
@@ -188,12 +189,26 @@ class SuRequestViewModel(
         override fun sendAccessibilityEvent(host: View, eventType: Int) {}
         override fun performAccessibilityAction(host: View, action: Int, args: Bundle?) = true
         override fun sendAccessibilityEventUnchecked(host: View, event: AccessibilityEvent) {}
-        override fun dispatchPopulateAccessibilityEvent(host: View, event: AccessibilityEvent) = true
+        override fun dispatchPopulateAccessibilityEvent(host: View, event: AccessibilityEvent) =
+            true
+
         override fun onPopulateAccessibilityEvent(host: View, event: AccessibilityEvent) {}
         override fun onInitializeAccessibilityEvent(host: View, event: AccessibilityEvent) {}
         override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {}
-        override fun addExtraDataToAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo, extraDataKey: String, arguments: Bundle?) {}
-        override fun onRequestSendAccessibilityEvent(host: ViewGroup, child: View, event: AccessibilityEvent): Boolean = false
+        override fun addExtraDataToAccessibilityNodeInfo(
+            host: View,
+            info: AccessibilityNodeInfo,
+            extraDataKey: String,
+            arguments: Bundle?
+        ) {
+        }
+
+        override fun onRequestSendAccessibilityEvent(
+            host: ViewGroup,
+            child: View,
+            event: AccessibilityEvent
+        ): Boolean = false
+
         override fun getAccessibilityNodeProvider(host: View): AccessibilityNodeProvider? = null
     }
 }

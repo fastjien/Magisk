@@ -1,8 +1,8 @@
 use super::SuInfo;
 use super::db::RootSettings;
-use crate::consts::{INTERNAL_DIR, MAGISK_FILE_CON};
+use crate::consts::{INTERNAL_DIR, SUNNY_FILE_CON};
 use crate::daemon::to_user_id;
-use crate::ffi::{SuPolicy, SuRequest, get_magisk_tmp};
+use crate::ffi::{SuPolicy, SuRequest, get_sunny_tmp};
 use crate::socket::IpcRead;
 use ExtraVal::{Bool, Int, IntList, Str};
 use base::{
@@ -160,7 +160,7 @@ impl SuAppContext<'_> {
         let mut fifo = cstr::buf::new::<64>();
         fifo.write_fmt(format_args!(
             "{}/{}/su_request_{}",
-            get_magisk_tmp(),
+            get_sunny_tmp(),
             INTERNAL_DIR,
             self.cred.pid
         ))
@@ -171,7 +171,7 @@ impl SuAppContext<'_> {
             attr.st.st_mode = 0o600;
             attr.st.st_uid = self.info.mgr_uid.as_();
             attr.st.st_gid = self.info.mgr_uid.as_();
-            attr.con.write_str(MAGISK_FILE_CON).ok();
+            attr.con.write_str(SUNNY_FILE_CON).ok();
 
             fifo.mkfifo(0o600)?;
             fifo.set_attr(&attr)?;

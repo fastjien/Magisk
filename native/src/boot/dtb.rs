@@ -45,7 +45,7 @@ struct Test {}
 
 fn print_dtb_usage() {
     eprintln!(
-        r#"Usage: magiskboot dtb <file> <action> [args...]
+        r#"Usage: sunnyboot dtb <file> <action> [args...]
 Do dtb related actions to <file>.
 
 Supported actions:
@@ -282,7 +282,7 @@ pub fn dtb_commands(argc: i32, argv: *const *const c_char) -> bool {
         let cmds = map_args(argc, argv)?;
 
         let mut cli =
-            DtbCli::from_args(&["magiskboot", "dtb"], &cmds).on_early_exit(print_dtb_usage);
+            DtbCli::from_args(&["sunnyboot", "dtb"], &cmds).on_early_exit(print_dtb_usage);
 
         let file = Utf8CStr::from_string(&mut cli.file);
 

@@ -87,8 +87,8 @@
             </com.google.android.material.card.MaterialCardView>
 
             <include
-                android:id="@+id/home_magisk_wrapper"
-                layout="@layout/include_home_magisk"
+                android:id="@+id/home_sunny_wrapper"
+                layout="@layout/include_home_sunny"
                 viewModel="@{viewModel}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
                 android:layout_marginStart="@dimen/l1"
                 android:layout_marginTop="@dimen/l1"
                 android:layout_marginEnd="@dimen/l1"
-                app:layout_constraintTop_toBottomOf="@+id/home_magisk_wrapper" />
+                app:layout_constraintTop_toBottomOf="@+id/home_sunny_wrapper" />
 
             <!-- FIXME 暂时写死 -->
             <!--            <Space-->
@@ -139,7 +139,7 @@
                 android:layout_marginStart="@dimen/l1"
                 android:layout_marginEnd="@dimen/l1"
                 android:onClick="@{() -> viewModel.onDeletePressed()}"
-                android:text="@string/uninstall_magisk_title"
+                android:text="@string/uninstall_sunny_title"
                 android:textAllCaps="false"
                 android:textSize="12sp"
                 app:cornerRadius="@dimen/r1"

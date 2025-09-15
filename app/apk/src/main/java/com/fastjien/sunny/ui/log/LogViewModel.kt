@@ -33,7 +33,7 @@ class LogViewModel(
     // --- empty view
 
     val itemEmpty = TextItem(R.string.log_data_none)
-    val itemMagiskEmpty = TextItem(R.string.log_data_magisk_none)
+    val itemMagiskEmpty = TextItem(R.string.log_data_sunny_none)
 
     // --- su log
 
@@ -42,16 +42,16 @@ class LogViewModel(
         it.put(BR.viewModel, this)
     }
 
-    // --- magisk log
+    // --- sunny log
     val logs = diffList<LogRvItem>()
-    var magiskLogRaw = " "
+    var sunnyLogRaw = " "
 
     override suspend fun doLoadWork() {
         loading = true
 
         val (suLogs, suDiff) = withContext(Dispatchers.Default) {
-            magiskLogRaw = repo.fetchMagiskLogs()
-            val newLogs = magiskLogRaw.split('\n').map { LogRvItem(it) }
+            sunnyLogRaw = repo.fetchMagiskLogs()
+            val newLogs = sunnyLogRaw.split('\n').map { LogRvItem(it) }
             logs.update(newLogs)
             val suLogs = repo.fetchSuLogs().map { SuLogRvItem(it) }
             suLogs to items.calculateDiff(suLogs)
@@ -67,7 +67,7 @@ class LogViewModel(
 
     fun saveMagiskLog() = withExternalRW {
         viewModelScope.launch(Dispatchers.IO) {
-            val filename = "magisk_log_%s.log".format(
+            val filename = "sunny_log_%s.log".format(
                 System.currentTimeMillis().toTime(timeFormatStandard)
             )
             val logFile = MediaStoreUtils.getFile(filename)
@@ -91,7 +91,7 @@ class LogViewModel(
 
                 file.write("\n---Magisk Logs---\n")
                 file.write("${Info.env.versionString} (${Info.env.versionCode})\n\n")
-                if (Info.env.isActive) file.write(magiskLogRaw)
+                if (Info.env.isActive) file.write(sunnyLogRaw)
 
                 file.write("\n---Manager Logs---\n")
                 file.write("${BuildConfig.APP_VERSION_NAME} (${BuildConfig.APP_VERSION_CODE})\n\n")

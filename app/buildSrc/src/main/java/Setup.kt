@@ -47,7 +47,7 @@ fun Project.setupCommon() {
     androidBase {
         compileSdkVersion(36)
         buildToolsVersion = "36.0.0"
-        ndkPath = "$sdkDirectory/ndk/magisk"
+        ndkPath = "$sdkDirectory/ndk/sunny"
         ndkVersion = "28.1.13356709"
 
         defaultConfig {
@@ -140,10 +140,10 @@ fun Project.setupCoreLib() {
                 into(abi) {
                     from(rootFile("native/out/$abi")) {
                         include(
-                            "magiskboot",
-                            "magiskinit",
-                            "magiskpolicy",
-                            "magisk",
+                            "sunnyboot",
+                            "sunnyinit",
+                            "sunnypolicy",
+                            "sunny",
                             "libinit-ld.so"
                         )
                         rename { if (it.endsWith(".so")) it else "lib$it.so" }
@@ -197,8 +197,8 @@ fun Project.setupCoreLib() {
             filesMatching("**/util_functions.sh") {
                 filter {
                     it.replace(
-                        "#MAGISK_VERSION_STUB",
-                        "MAGISK_VER='${Config.version}'\nMAGISK_VER_CODE=${Config.versionCode}"
+                        "#SUNNY_VERSION_STUB",
+                        "SUNNY_VER='${Config.version}'\nSUNNY_VER_CODE=${Config.versionCode}"
                     )
                 }
                 filter<FixCrLfFilter>("eol" to FixCrLfFilter.CrLf.newInstance("lf"))

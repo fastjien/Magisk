@@ -84,12 +84,12 @@ object Info {
 
     fun init(shell: Shell) {
         if (shell.isRoot) {
-            val v = fastCmd(shell, "magisk -v").split(":")
+            val v = fastCmd(shell, "sunny -v").split(":")
             env = Env(
                 v[0], v.size >= 3 && v[2] == "D",
-                runCatching { fastCmd("magisk -V").toInt() }.getOrDefault(-1)
+                runCatching { fastCmd("sunny -V").toInt() }.getOrDefault(-1)
             )
-            Config.denyList = fastCmdResult(shell, "magisk --denylist status")
+            Config.denyList = fastCmdResult(shell, "sunny --denylist status")
         }
 
         val map = mutableMapOf<String, String>()

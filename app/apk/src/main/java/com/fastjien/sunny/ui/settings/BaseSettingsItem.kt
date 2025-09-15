@@ -10,7 +10,7 @@ import com.fastjien.sunny.core.ktx.activity
 import com.fastjien.sunny.databinding.ObservableRvItem
 import com.fastjien.sunny.databinding.set
 import com.fastjien.sunny.utils.TextHolder
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 
 sealed class BaseSettingsItem : ObservableRvItem() {
 
@@ -77,10 +77,10 @@ sealed class BaseSettingsItem : ObservableRvItem() {
 
         override fun onPressed(view: View, handler: Handler) {
             handler.onItemPressed(view, this) {
-                MagiskDialog(view.activity).apply {
+                SunnyDialog(view.activity).apply {
                     setTitle(title.getText(view.resources))
                     setView(getView(view.context))
-                    setButton(MagiskDialog.ButtonType.POSITIVE) {
+                    setButton(SunnyDialog.ButtonType.POSITIVE) {
                         text = android.R.string.ok
                         onClick {
                             inputResult?.let { result ->
@@ -92,7 +92,7 @@ sealed class BaseSettingsItem : ObservableRvItem() {
                             doNotDismiss = true
                         }
                     }
-                    setButton(MagiskDialog.ButtonType.NEGATIVE) {
+                    setButton(SunnyDialog.ButtonType.NEGATIVE) {
                         text = android.R.string.cancel
                     }
                 }.show()
@@ -120,9 +120,9 @@ sealed class BaseSettingsItem : ObservableRvItem() {
 
         override fun onPressed(view: View, handler: Handler) {
             handler.onItemPressed(view, this) {
-                MagiskDialog(view.activity).apply {
+                SunnyDialog(view.activity).apply {
                     setTitle(title.getText(view.resources))
-                    setButton(MagiskDialog.ButtonType.NEGATIVE) {
+                    setButton(SunnyDialog.ButtonType.NEGATIVE) {
                         text = android.R.string.cancel
                     }
                     setListItems(entries(view.resources)) {

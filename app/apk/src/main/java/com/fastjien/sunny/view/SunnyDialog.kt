@@ -33,7 +33,7 @@ import com.fastjien.sunny.databinding.setAdapter
 
 typealias DialogButtonClickListener = (DialogInterface) -> Unit
 
-class MagiskDialog(
+class SunnyDialog(
     context: Activity, theme: Int = 0
 ) : AppCompatDialog(context, theme) {
 
@@ -118,7 +118,7 @@ class MagiskDialog(
         }
 
         fun clicked() {
-            onClickAction(this@MagiskDialog)
+            onClickAction(this@SunnyDialog)
             if (!doNotDismiss) {
                 dismiss()
             }

@@ -14,7 +14,7 @@ import com.fastjien.sunny.core.base.relaunch
 import com.google.android.material.snackbar.Snackbar
 import com.fastjien.sunny.utils.TextHolder
 import com.fastjien.sunny.utils.asText
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import com.fastjien.sunny.view.Shortcuts
 
 class PermissionEvent(
@@ -115,10 +115,10 @@ class DialogEvent(
     private val builder: DialogBuilder
 ) : ViewEvent(), ActivityExecutor {
     override fun invoke(activity: UIActivity<*>) {
-        MagiskDialog(activity).apply(builder::build).show()
+        SunnyDialog(activity).apply(builder::build).show()
     }
 }
 
 interface DialogBuilder {
-    fun build(dialog: MagiskDialog)
+    fun build(dialog: SunnyDialog)
 }

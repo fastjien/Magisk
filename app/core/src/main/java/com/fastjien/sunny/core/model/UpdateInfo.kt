@@ -10,7 +10,7 @@ import java.time.Instant
 
 @JsonClass(generateAdapter = true)
 class UpdateJson(
-    val magisk: UpdateInfo = UpdateInfo(),
+    val sunny: UpdateInfo = UpdateInfo(),
 )
 
 @Parcelize

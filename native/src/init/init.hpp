@@ -1,7 +1,7 @@
 #pragma once
 
 #define DEFAULT_DT_DIR "/proc/device-tree/firmware/android"
-#define REDIR_PATH "/data/magiskinit"
+#define REDIR_PATH "/data/sunnyinit"
 
 #define PRELOAD_LIB    "/dev/preload.so"
 #define PRELOAD_POLICY "/dev/sepolicy"
@@ -14,7 +14,7 @@
 
 #include "init-rs.hpp"
 
-int magisk_proxy_main(int, char *argv[]);
+int sunny_proxy_main(int, char *argv[]);
 rust::Utf8CStr backup_init();
 
 // Expose some constants to Rust

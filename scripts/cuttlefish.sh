@@ -4,12 +4,12 @@ set -xe
 . scripts/test_common.sh
 
 cvd_args="-daemon -enable_sandbox=false -memory_mb=8192 -report_anonymous_usage_stats=n -cpus=$core_count"
-magisk_args='-init_boot_image=magisk_patched.img'
+sunny_args='-init_boot_image=sunny_patched.img'
 
 cleanup() {
   print_error "! An error occurred"
   run_cvd_bin stop_cvd || true
-  rm -f magisk_patched.img*
+  rm -f sunny_patched.img*
 }
 
 run_cvd_bin() {
@@ -66,7 +66,7 @@ test_cf() {
   run_cvd_bin stop_cvd || true
 
   print_title "* Testing $variant builds"
-  timeout $boot_timeout bash -c "run_cvd_bin launch_cvd $cvd_args $magisk_args -resume=false"
+  timeout $boot_timeout bash -c "run_cvd_bin launch_cvd $cvd_args $sunny_args -resume=false"
   adb wait-for-device
   run_setup $variant
 
@@ -74,7 +74,7 @@ test_cf() {
   sleep 5
   run_cvd_bin stop_cvd || true
 
-  timeout $boot_timeout bash -c "run_cvd_bin launch_cvd $cvd_args $magisk_args"
+  timeout $boot_timeout bash -c "run_cvd_bin launch_cvd $cvd_args $sunny_args"
   adb wait-for-device
   run_tests
 }
@@ -85,16 +85,16 @@ test_main() {
   adb wait-for-device
 
   # Patch and test debug build
-  ./build.py -v avd_patch "$CF_HOME/init_boot.img" magisk_patched.img
+  ./build.py -v avd_patch "$CF_HOME/init_boot.img" sunny_patched.img
   test_cf debug
 
   # Patch and test release build
-  ./build.py -vr avd_patch "$CF_HOME/init_boot.img" magisk_patched.img
+  ./build.py -vr avd_patch "$CF_HOME/init_boot.img" sunny_patched.img
   test_cf release
 
   # Cleanup
   run_cvd_bin stop_cvd || true
-  rm -f magisk_patched.img*
+  rm -f sunny_patched.img*
 }
 
 if [ -z $CF_HOME ]; then

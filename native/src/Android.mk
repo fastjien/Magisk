@@ -4,19 +4,19 @@ LOCAL_PATH := $(call my-dir)
 # Binaries
 ########################
 
-ifdef B_MAGISK
+ifdef B_SUNNY
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := magisk
+LOCAL_MODULE := sunny
 LOCAL_STATIC_LIBRARIES := \
     libbase \
     libsystemproperties \
     liblsplt \
-    libmagisk-rs
+    libsunny-rs
 
 LOCAL_SRC_FILES := \
     core/applets.cpp \
-    core/magisk.cpp \
+    core/sunny.cpp \
     core/daemon.cpp \
     core/scripting.cpp \
     core/sqlite.cpp \
@@ -51,7 +51,7 @@ endif
 ifdef B_INIT
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := magiskinit
+LOCAL_MODULE := sunnyinit
 LOCAL_STATIC_LIBRARIES := \
     libbase \
     libpolicy \
@@ -78,7 +78,7 @@ endif
 ifdef B_BOOT
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := magiskboot
+LOCAL_MODULE := sunnyboot
 LOCAL_STATIC_LIBRARIES := \
     libbase \
     liblzma \
@@ -105,7 +105,7 @@ endif
 ifdef B_POLICY
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := magiskpolicy
+LOCAL_MODULE := sunnypolicy
 LOCAL_STATIC_LIBRARIES := \
     libbase \
     libpolicy \
@@ -122,7 +122,7 @@ LOCAL_MODULE := resetprop
 LOCAL_STATIC_LIBRARIES := \
     libbase \
     libsystemproperties \
-    libmagisk-rs
+    libsunny-rs
 
 LOCAL_SRC_FILES := \
     core/applet_stub.cpp \

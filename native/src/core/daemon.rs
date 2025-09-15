@@ -1,10 +1,10 @@
-use crate::consts::{MAGISK_FULL_VER, MAGISK_PROC_CON, MAIN_CONFIG, ROOTMNT, ROOTOVL, SECURE_DIR};
+use crate::consts::{SUNNY_FULL_VER, SUNNY_PROC_CON, MAIN_CONFIG, ROOTMNT, ROOTOVL, SECURE_DIR};
 use crate::db::Sqlite3;
 use crate::ffi::{
     DbEntryKey, ModuleInfo, RequestCode, check_key_combo, exec_common_scripts, exec_module_scripts,
-    get_magisk_tmp, get_prop, initialize_denylist, set_prop, setup_magisk_env,
+    get_sunny_tmp, get_prop, initialize_denylist, set_prop, setup_sunny_env,
 };
-use crate::logging::{magisk_logging, setup_logfile, start_log_daemon};
+use crate::logging::{sunny_logging, setup_logfile, start_log_daemon};
 use crate::module::disable_modules;
 use crate::mount::{clean_mounts, setup_preinit_dir};
 use crate::package::ManagerInfo;
@@ -21,8 +21,8 @@ use std::process::Command;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{Mutex, OnceLock};
 
-// Global magiskd singleton
-pub static MAGISKD: OnceLock<MagiskD> = OnceLock::new();
+// Global sunnyd singleton
+pub static SUNNYD: OnceLock<SunnyD> = OnceLock::new();
 
 #[repr(u32)]
 enum BootState {
@@ -61,7 +61,7 @@ pub const fn to_user_id(uid: i32) -> i32 {
 }
 
 #[derive(Default)]
-pub struct MagiskD {
+pub struct SunnyD {
     pub sql_connection: Mutex<Option<Sqlite3>>,
     pub manager_info: Mutex<ManagerInfo>,
     boot_stage_lock: Mutex<BootStateFlags>,
@@ -75,9 +75,9 @@ pub struct MagiskD {
     is_recovery: bool,
 }
 
-impl MagiskD {
-    pub fn get() -> &'static MagiskD {
-        unsafe { MAGISKD.get().unwrap_unchecked() }
+impl SunnyD {
+    pub fn get() -> &'static SunnyD {
+        unsafe { SUNNYD.get().unwrap_unchecked() }
     }
 
     pub fn zygisk_enabled(&self) -> bool {
@@ -115,8 +115,8 @@ impl MagiskD {
 
         self.prune_su_access();
 
-        if !setup_magisk_env() {
-            error!("* Magisk environment incomplete, abort");
+        if !setup_sunny_env() {
+            error!("* Sunny environment incomplete, abort");
             return true;
         }
 
@@ -227,24 +227,24 @@ impl MagiskD {
 pub fn daemon_entry() {
     unsafe { libc::setsid() };
 
-    // Make sure the current context is magisk
+    // Make sure the current context is sunny
     if let Ok(mut current) = cstr!("/proc/self/attr/current").open(O_WRONLY | O_CLOEXEC) {
-        let con = cstr!(MAGISK_PROC_CON);
+        let con = cstr!(SUNNY_PROC_CON);
         current.write_all(con.as_bytes_with_nul()).log_ok();
     }
 
     start_log_daemon();
-    magisk_logging();
-    info!("Magisk {} daemon started", MAGISK_FULL_VER);
+    sunny_logging();
+    info!("Sunny {} daemon started", SUNNY_FULL_VER);
 
     let is_emulator = get_prop(cstr!("ro.kernel.qemu"), false) == "1"
         || get_prop(cstr!("ro.boot.qemu"), false) == "1"
         || get_prop(cstr!("ro.product.device"), false).contains("vsoc");
 
     // Load config status
-    let magisk_tmp = get_magisk_tmp();
+    let sunny_tmp = get_sunny_tmp();
     let mut tmp_path = cstr::buf::new::<64>()
-        .join_path(magisk_tmp)
+        .join_path(sunny_tmp)
         .join_path(MAIN_CONFIG);
     let mut is_recovery = false;
     if let Ok(main_config) = tmp_path.open(O_RDONLY | O_CLOEXEC) {
@@ -256,7 +256,7 @@ pub fn daemon_entry() {
             true
         });
     }
-    tmp_path.truncate(magisk_tmp.len());
+    tmp_path.truncate(sunny_tmp.len());
 
     let mut sdk_int = -1;
     if let Ok(build_prop) = cstr!("/system/build.prop").open(O_RDONLY | O_CLOEXEC) {
@@ -302,7 +302,7 @@ pub fn daemon_entry() {
             true
         })
     }
-    tmp_path.truncate(magisk_tmp.len());
+    tmp_path.truncate(sunny_tmp.len());
 
     // Remount rootfs as read-only if requested
     if std::env::var_os("REMOUNT_ROOT").is_some() {
@@ -313,16 +313,16 @@ pub fn daemon_entry() {
     // Remove all pre-init overlay files to free-up memory
     tmp_path.append_path(ROOTOVL);
     tmp_path.remove_all().log_ok();
-    tmp_path.truncate(magisk_tmp.len());
+    tmp_path.truncate(sunny_tmp.len());
 
-    let magiskd = MagiskD {
+    let sunnyd = SunnyD {
         sdk_int,
         is_emulator,
         is_recovery,
         zygote_start_count: AtomicU32::new(1),
         ..Default::default()
     };
-    MAGISKD.set(magiskd).ok();
+    SUNNYD.set(sunnyd).ok();
 }
 
 fn switch_cgroup(cgroup: &str, pid: i32) {

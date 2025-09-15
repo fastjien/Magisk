@@ -1,7 +1,7 @@
 package com.fastjien.sunny.core.repository
 
-import com.fastjien.sunny.core.data.magiskdb.SettingsDao
-import com.fastjien.sunny.core.data.magiskdb.StringDao
+import com.fastjien.sunny.core.data.sunnydb.SettingsDao
+import com.fastjien.sunny.core.data.sunnydb.StringDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

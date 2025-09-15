@@ -47,14 +47,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (argv0 == "magisk" || argv0 == "magisk32" || argv0 == "magisk64") {
+    if (argv0 == "sunny" || argv0 == "sunny32" || argv0 == "sunny64") {
         if (argc > 1 && argv[1][0] != '-') {
-            // Calling applet with "magisk [applet] args..."
+            // Calling applet with "sunny [applet] args..."
             --argc;
             ++argv;
             argv0 = argv[0];
         } else {
-            return magisk_main(argc, argv);
+            return sunny_main(argc, argv);
         }
     }
 

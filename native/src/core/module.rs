@@ -1,7 +1,7 @@
 use crate::consts::{MODULEMNT, MODULEROOT, MODULEUPGRADE, WORKERDIR};
-use crate::daemon::MagiskD;
+use crate::daemon::SunnyD;
 use crate::ffi::{
-    ModuleInfo, exec_module_scripts, exec_script, get_magisk_tmp, get_zygisk_lib_name,
+    ModuleInfo, exec_module_scripts, exec_script, get_sunny_tmp, get_zygisk_lib_name,
     load_prop_file, set_zygisk_prop,
 };
 use crate::mount::setup_module_mount;
@@ -17,7 +17,7 @@ use std::path::{Component, Path};
 use std::ptr;
 use std::sync::atomic::Ordering;
 
-const MAGISK_BIN_INJECT_PARTITIONS: [&Utf8CStr; 4] = [
+const SUNNY_BIN_INJECT_PARTITIONS: [&Utf8CStr; 4] = [
     cstr!("/system/"),
     cstr!("/vendor/"),
     cstr!("/product/"),
@@ -140,7 +140,7 @@ enum FsNode {
     Directory { children: FsNodeMap },
     File { src: Utf8CString },
     Symlink { target: Utf8CString },
-    MagiskLink,
+    SunnyLink,
     Whiteout,
 }
 
@@ -351,15 +351,15 @@ impl FsNode {
                     clone_attr(path.real(), path.worker())?;
                 }
             }
-            FsNode::MagiskLink => {
+            FsNode::SunnyLink => {
                 if let Some(name) = path.real().file_name()
                     && name == "supolicy"
                 {
-                    module_log!("mklink", path.worker(), "./magiskpolicy");
-                    path.worker().create_symlink_to(cstr!("./magiskpolicy"))?;
+                    module_log!("mklink", path.worker(), "./sunnypolicy");
+                    path.worker().create_symlink_to(cstr!("./sunnypolicy"))?;
                 } else {
-                    module_log!("mklink", path.worker(), "./magisk");
-                    path.worker().create_symlink_to(cstr!("./magisk"))?;
+                    module_log!("mklink", path.worker(), "./sunny");
+                    path.worker().create_symlink_to(cstr!("./sunny"))?;
                 }
             }
             FsNode::Whiteout => {
@@ -376,34 +376,34 @@ fn get_path_env() -> String {
         .unwrap_or_default()
 }
 
-fn inject_magisk_bins(system: &mut FsNode, is_emulator: bool) {
+fn inject_sunny_bins(system: &mut FsNode, is_emulator: bool) {
     fn inject(children: &mut FsNodeMap) {
-        let mut path = cstr::buf::default().join_path(get_magisk_tmp());
+        let mut path = cstr::buf::default().join_path(get_sunny_tmp());
 
         // Inject binaries
 
         let len = path.len();
-        path.append_path("magisk");
+        path.append_path("sunny");
         children.insert(
-            "magisk".to_string(),
+            "sunny".to_string(),
             FsNode::File {
                 src: path.to_owned(),
             },
         );
 
         path.truncate(len);
-        path.append_path("magiskpolicy");
+        path.append_path("sunnypolicy");
         children.insert(
-            "magiskpolicy".to_string(),
+            "sunnypolicy".to_string(),
             FsNode::File {
                 src: path.to_owned(),
             },
         );
 
         // Inject applet symlinks
-        children.insert("op".to_string(), FsNode::MagiskLink);
-        children.insert("resetprop".to_string(), FsNode::MagiskLink);
-        children.insert("supolicy".to_string(), FsNode::MagiskLink);
+        children.insert("op".to_string(), FsNode::SunnyLink);
+        children.insert("resetprop".to_string(), FsNode::SunnyLink);
+        children.insert("supolicy".to_string(), FsNode::SunnyLink);
     }
 
     // Strip /system prefix to insert correct node
@@ -419,7 +419,7 @@ fn inject_magisk_bins(system: &mut FsNode, is_emulator: bool) {
 
     for orig_item in path_env.split(':') {
         // Filter non-suitable paths
-        if !MAGISK_BIN_INJECT_PARTITIONS
+        if !SUNNY_BIN_INJECT_PARTITIONS
             .iter()
             .any(|p| orig_item.starts_with(p.as_str()))
         {
@@ -516,19 +516,19 @@ fn inject_zygisk_bins(system: &mut FsNode) {
             .children()
             .map(|c| c.entry("lib".to_string()).or_insert_with(FsNode::new_dir));
         if let Some(FsNode::Directory { children }) = lib {
-            let mut bin_path = cstr::buf::default().join_path(get_magisk_tmp());
+            let mut bin_path = cstr::buf::default().join_path(get_sunny_tmp());
 
             #[cfg(target_pointer_width = "64")]
-            bin_path.append_path("magisk32");
+            bin_path.append_path("sunny32");
 
             #[cfg(target_pointer_width = "32")]
-            bin_path.append_path("magisk");
+            bin_path.append_path("sunny");
 
             // There are some devices that announce ABI as 64 bit only, but ship with linker
             // because they make use of a special 32 bit to 64 bit translator (such as tango).
-            // In this case, magisk32 does not exist, so inserting it will cause bind mount
+            // In this case, sunny32 does not exist, so inserting it will cause bind mount
             // failure and affect module mount. Native bridge injection does not support these
-            // kind of translators anyway, so simply check if magisk32 exists here.
+            // kind of translators anyway, so simply check if sunny32 exists here.
             if bin_path.exists() {
                 children.insert(
                     name.to_string(),
@@ -547,8 +547,8 @@ fn inject_zygisk_bins(system: &mut FsNode) {
             .map(|c| c.entry("lib64".to_string()).or_insert_with(FsNode::new_dir));
         if let Some(FsNode::Directory { children }) = lib64 {
             let bin_path = cstr::buf::default()
-                .join_path(get_magisk_tmp())
-                .join_path("magisk");
+                .join_path(get_sunny_tmp())
+                .join_path("sunny");
 
             children.insert(
                 name.to_string(),
@@ -569,11 +569,11 @@ fn apply_modules(zygisk: bool, module_list: &[ModuleInfo], is_emulator: bool) {
     let mut module_dir = cstr::buf::default().join_path(MODULEROOT);
 
     let mut module_mnt = cstr::buf::default()
-        .join_path(get_magisk_tmp())
+        .join_path(get_sunny_tmp())
         .join_path(MODULEMNT);
 
     let mut worker = cstr::buf::default()
-        .join_path(get_magisk_tmp())
+        .join_path(get_sunny_tmp())
         .join_path(WORKERDIR);
 
     // Create a collection of all relevant paths
@@ -618,14 +618,14 @@ fn apply_modules(zygisk: bool, module_list: &[ModuleInfo], is_emulator: bool) {
 
     // Step 2: Inject custom files
     //
-    // Magisk provides some built-in functionality that requires augmenting the filesystem.
+    // Sunny provides some built-in functionality that requires augmenting the filesystem.
     // We expose several cmdline tools (e.g. su) into PATH, and the zygisk shared library
     // has to also be added into the default LD_LIBRARY_PATH for code injection.
     // We directly inject file nodes into the virtual filesystem tree we built in the previous
-    // step, treating Magisk just like a special "module".
+    // step, treating Sunny just like a special "module".
 
-    if get_magisk_tmp() != "/sbin" || get_path_env().split(":").all(|s| s != "/sbin") {
-        inject_magisk_bins(&mut system, is_emulator);
+    if get_sunny_tmp() != "/sbin" || get_path_env().split(":").all(|s| s != "/sbin") {
+        inject_sunny_bins(&mut system, is_emulator);
     }
     if zygisk {
         inject_zygisk_bins(&mut system);
@@ -634,7 +634,7 @@ fn apply_modules(zygisk: bool, module_list: &[ModuleInfo], is_emulator: bool) {
     // Step 3: Extract all supported read-only partition roots
     //
     // For simplicity and backwards compatibility on older Android versions, when constructing
-    // Magisk modules, we always assume that there is only a single read-only partition mounted
+    // Sunny modules, we always assume that there is only a single read-only partition mounted
     // at /system. However, on modern Android there are actually multiple read-only partitions
     // mounted at their respective paths. We need to extract these subtrees out of the main
     // tree and treat them as individual trees.
@@ -866,7 +866,7 @@ fn collect_modules(zygisk_enabled: bool, open_zygisk: bool) -> Vec<ModuleInfo> {
     modules
 }
 
-impl MagiskD {
+impl SunnyD {
     pub fn handle_modules(&self) {
         setup_module_mount();
         upgrade_modules().ok();

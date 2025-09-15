@@ -38,7 +38,7 @@ disable_version_config() {
 
 bump_canary_version() {
   # Update version code
-  local code=$(grep_prop magisk.versionCode $GCONFIG)
+  local code=$(grep_prop sunny.versionCode $GCONFIG)
   code=$((code + 1))
   local tag="canary-$code"
   sed -i "s:versionCode=.*:versionCode=${code}:g" $GCONFIG
@@ -52,7 +52,7 @@ bump_canary_version() {
   # Update version name
   local ver=$(git rev-parse --short=8 HEAD)
   sed -i "s:version=.*:version=${ver}:g" $CONFIG
-  sed -i "1s:.*:## Magisk (${ver}) (${code}):" $NOTES
+  sed -i "1s:.*:## Sunny (${ver}) (${code}):" $NOTES
 }
 
 # $1 = ver
@@ -63,12 +63,12 @@ set_version() {
 
   sed -i "s:versionCode=.*:versionCode=${code}:g" $GCONFIG
   sed -i "s:version=.*:version=${ver}:g" $CONFIG
-  sed -i "1s:.*:## $(date +'%Y.%-m.%-d') Magisk v$ver:" $NOTES
+  sed -i "1s:.*:## $(date +'%Y.%-m.%-d') Sunny v$ver:" $NOTES
 
   # Commit version code changes
   git add -u .
   git status
-  git commit -m "Release Magisk v$ver" -m "[skip ci]"
+  git commit -m "Release Sunny v$ver" -m "[skip ci]"
   git tag $tag
 }
 
@@ -100,7 +100,7 @@ upload() {
 
   local latest_tag=$(git describe --abbrev=0 --tags)
   local ver=$(grep_prop version $CONFIG)
-  local code=$(grep_prop magisk.versionCode $GCONFIG)
+  local code=$(grep_prop sunny.versionCode $GCONFIG)
   local out=$(grep_prop outdir $CONFIG)
   local tag title
 
@@ -117,7 +117,7 @@ upload() {
   case $type in
     canary )
       tag="canary-$code"
-      title="Magisk ($ver) ($code)"
+      title="Sunny ($ver) ($code)"
 
       # Assert tag format
       [ $latest_tag = $tag ]
@@ -127,13 +127,13 @@ upload() {
       ;;
     beta|stable )
       tag="v$ver"
-      title="Magisk v$ver"
+      title="Sunny v$ver"
 
       # Assert tag format
       [ $latest_tag = $tag ]
 
       # Publish release
-      local release_apk="Magisk-v${ver}.apk"
+      local release_apk="Sunny-v${ver}.apk"
       cp $out/app-release.apk $release_apk
       gh release create --verify-tag $tag -p -t "$title" -F release.md $release_apk $out/app-debug.apk $NOTES
       rm -f $release_apk

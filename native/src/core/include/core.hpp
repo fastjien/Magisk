@@ -30,9 +30,9 @@ struct ModuleInfo;
 
 // Daemon
 int connect_daemon(int req, bool create = false);
-const char *get_magisk_tmp();
+const char *get_sunny_tmp();
 void unlock_blocks();
-bool setup_magisk_env();
+bool setup_sunny_env();
 bool check_key_combo();
 
 // Zygisk daemon
@@ -110,11 +110,11 @@ bool is_deny_target(int uid, std::string_view process);
 void revert_unmount(int pid = -1) noexcept;
 void update_deny_flags(int uid, rust::Str process, uint32_t &flags);
 
-// MagiskSU
+// SunnySU
 void exec_root_shell(int client, int pid, SuRequest &req, MntNsMode mode);
 
 // Rust bindings
-static inline rust::Utf8CStr get_magisk_tmp_rs() { return get_magisk_tmp(); }
+static inline rust::Utf8CStr get_sunny_tmp_rs() { return get_sunny_tmp(); }
 static inline rust::String resolve_preinit_dir_rs(rust::Utf8CStr base_dir) {
     return resolve_preinit_dir(base_dir.c_str());
 }

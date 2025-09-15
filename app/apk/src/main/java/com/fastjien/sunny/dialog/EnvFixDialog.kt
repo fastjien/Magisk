@@ -8,20 +8,20 @@ import com.fastjien.sunny.core.Info
 import com.fastjien.sunny.core.R
 import com.fastjien.sunny.core.ktx.reboot
 import com.fastjien.sunny.core.ktx.toast
-import com.fastjien.sunny.core.tasks.MagiskInstaller
+import com.fastjien.sunny.core.tasks.SunnyInstaller
 import com.fastjien.sunny.events.DialogBuilder
 import com.fastjien.sunny.ui.home.HomeViewModel
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import com.topjohnwu.superuser.internal.UiThreadHandler
 import kotlinx.coroutines.launch
 
 class EnvFixDialog(private val vm: HomeViewModel, private val code: Int) : DialogBuilder {
 
-    override fun build(dialog: MagiskDialog) {
+    override fun build(dialog: SunnyDialog) {
         dialog.apply {
             setTitle(R.string.env_fix_title)
             setMessage(R.string.env_fix_msg)
-            setButton(MagiskDialog.ButtonType.POSITIVE) {
+            setButton(SunnyDialog.ButtonType.POSITIVE) {
                 text = android.R.string.ok
                 doNotDismiss = true
                 onClick {
@@ -32,7 +32,7 @@ class EnvFixDialog(private val vm: HomeViewModel, private val code: Int) : Dialo
                         setCancelable(false)
                     }
                     dialog.activity.lifecycleScope.launch {
-                        MagiskInstaller.FixEnv().exec { success ->
+                        SunnyInstaller.FixEnv().exec { success ->
                             dialog.dismiss()
                             context.toast(
                                 if (success) R.string.reboot_delay_toast else R.string.setup_fail,
@@ -44,7 +44,7 @@ class EnvFixDialog(private val vm: HomeViewModel, private val code: Int) : Dialo
                     }
                 }
             }
-            setButton(MagiskDialog.ButtonType.NEGATIVE) {
+            setButton(SunnyDialog.ButtonType.NEGATIVE) {
                 text = android.R.string.cancel
             }
         }
@@ -54,10 +54,10 @@ class EnvFixDialog(private val vm: HomeViewModel, private val code: Int) : Dialo
             Info.env.versionString != BuildConfig.APP_VERSION_NAME
         ) {
             dialog.setMessage(R.string.env_full_fix_msg)
-            dialog.setButton(MagiskDialog.ButtonType.POSITIVE) {
+            dialog.setButton(SunnyDialog.ButtonType.POSITIVE) {
                 text = android.R.string.ok
                 onClick {
-                    vm.onMagiskPressed()
+                    vm.onSunnyPressed()
                     dialog.dismiss()
                 }
             }

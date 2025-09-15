@@ -38,7 +38,7 @@ cleanup() {
   pkill -INT -P $$
   wait
   trap - EXIT
-  rm -f magisk_*.img
+  rm -f sunny_*.img
   "$avd" delete avd -n test
   exit 1
 }
@@ -148,13 +148,13 @@ setup_emu() {
 test_emu() {
   local variant=$1
 
-  local magisk_args="-ramdisk magisk_${variant}.img -feature -SystemAsRoot"
+  local sunny_args="-ramdisk sunny_${variant}.img -feature -SystemAsRoot"
 
   if [ -n "$AVD_TEST_LOG" ]; then
     rm -f logcat.log
-    "$emu" @test $emu_args $log_args $magisk_args > kernel.log 2>&1 &
+    "$emu" @test $emu_args $log_args $sunny_args > kernel.log 2>&1 &
   else
-    "$emu" @test $emu_args $magisk_args > /dev/null 2>&1 &
+    "$emu" @test $emu_args $sunny_args > /dev/null 2>&1 &
   fi
 
   emu_pid=$!
@@ -189,10 +189,10 @@ test_main() {
 
   # Patch images
   if [ -z "$AVD_TEST_SKIP_DEBUG" ]; then
-    ./build.py -v avd_patch "$ramdisk" magisk_debug.img
+    ./build.py -v avd_patch "$ramdisk" sunny_debug.img
   fi
   if [ -z "$AVD_TEST_SKIP_RELEASE" ]; then
-    ./build.py -vr avd_patch "$ramdisk" magisk_release.img
+    ./build.py -vr avd_patch "$ramdisk" sunny_release.img
   fi
 
   kill -INT $emu_pid
@@ -209,7 +209,7 @@ test_main() {
   fi
 
   # Cleanup
-  rm -f magisk_*.img
+  rm -f sunny_*.img
   "$avd" delete avd -n test
 }
 

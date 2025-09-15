@@ -3,9 +3,9 @@
 
 use logging::setup_klog;
 // Has to be pub so all symbols in that crate is included
-pub use magiskpolicy;
+pub use sunnypolicy;
 use mount::{is_device_mounted, switch_root};
-use rootdir::{OverlayAttr, inject_magisk_rc};
+use rootdir::{OverlayAttr, inject_sunny_rc};
 
 #[path = "../include/consts.rs"]
 mod consts;
@@ -38,7 +38,7 @@ pub mod ffi {
         partition_map: Vec<KeyValue>,
     }
 
-    struct MagiskInit {
+    struct SunnyInit {
         preinit_dev: String,
         mount_list: Vec<String>,
         argv: *mut *mut c_char,
@@ -53,7 +53,7 @@ pub mod ffi {
         #[cxx_name = "Utf8CStr"]
         type Utf8CStrRef<'a> = base::ffi::Utf8CStrRef<'a>;
 
-        unsafe fn magisk_proxy_main(argc: i32, argv: *mut *mut c_char) -> i32;
+        unsafe fn sunny_proxy_main(argc: i32, argv: *mut *mut c_char) -> i32;
         fn backup_init() -> Utf8CStrRef<'static>;
 
         // Constants
@@ -66,7 +66,7 @@ pub mod ffi {
     #[namespace = "rust"]
     extern "Rust" {
         fn setup_klog();
-        fn inject_magisk_rc(fd: i32, tmp_dir: Utf8CStrRef);
+        fn inject_sunny_rc(fd: i32, tmp_dir: Utf8CStrRef);
         fn switch_root(path: Utf8CStrRef);
         fn is_device_mounted(dev: u64, target: Pin<&mut CxxString>) -> bool;
     }
@@ -81,25 +81,25 @@ pub mod ffi {
         fn set(self: &mut BootConfig, config: &kv_pairs);
     }
 
-    // MagiskInit
+    // SunnyInit
     extern "Rust" {
         type OverlayAttr;
-        fn parse_config_file(self: &mut MagiskInit);
-        fn mount_overlay(self: &mut MagiskInit, dest: Utf8CStrRef);
-        fn handle_sepolicy(self: &mut MagiskInit);
-        fn restore_overlay_contexts(self: &MagiskInit);
+        fn parse_config_file(self: &mut SunnyInit);
+        fn mount_overlay(self: &mut SunnyInit, dest: Utf8CStrRef);
+        fn handle_sepolicy(self: &mut SunnyInit);
+        fn restore_overlay_contexts(self: &SunnyInit);
     }
     unsafe extern "C++" {
         // Used in Rust
-        fn mount_system_root(self: &mut MagiskInit) -> bool;
-        fn patch_rw_root(self: &mut MagiskInit);
-        fn patch_ro_root(self: &mut MagiskInit);
+        fn mount_system_root(self: &mut SunnyInit) -> bool;
+        fn patch_rw_root(self: &mut SunnyInit);
+        fn patch_ro_root(self: &mut SunnyInit);
 
         // Used in C++
-        unsafe fn setup_tmp(self: &mut MagiskInit, path: *const c_char);
-        fn collect_devices(self: &MagiskInit);
-        fn mount_preinit_dir(self: &mut MagiskInit);
-        unsafe fn find_block(self: &MagiskInit, partname: *const c_char) -> u64;
-        unsafe fn patch_fissiond(self: &mut MagiskInit, tmp_path: *const c_char);
+        unsafe fn setup_tmp(self: &mut SunnyInit, path: *const c_char);
+        fn collect_devices(self: &SunnyInit);
+        fn mount_preinit_dir(self: &mut SunnyInit);
+        unsafe fn find_block(self: &SunnyInit, partname: *const c_char) -> u64;
+        unsafe fn patch_fissiond(self: &mut SunnyInit, tmp_path: *const c_char);
     }
 }

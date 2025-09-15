@@ -1,7 +1,7 @@
 [package]
-name = "magiskinit"
-version.workspace = true
-edition.workspace = true
+name = "sunnyinit"  # 项目名称，作为 crate 的唯一标识
+version.workspace = true  # 版本号继承自工作区根配置（避免在子 crate 中重复定义）
+edition.workspace = true  # Rust 版本（如 2021）继承自工作区根配置
 
 [lib]
 crate-type = ["staticlib"]
@@ -12,5 +12,5 @@ cxx-gen = { workspace = true }
 
 [dependencies]
 base = { path = "../base" }
-magiskpolicy = { path = "../sepolicy", default-features = false }
+sunnypolicy = { path = "../sepolicy", default-features = false }
 cxx = { workspace = true }

@@ -1,5 +1,5 @@
 [package]
-name = "magiskboot"
+name = "sunnyboot"
 version.workspace = true
 edition.workspace = true
 

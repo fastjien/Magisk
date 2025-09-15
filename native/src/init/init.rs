@@ -2,7 +2,7 @@ use crate::ffi::backup_init;
 use crate::mount::is_rootfs;
 use crate::twostage::hexpatch_init_for_second_stage;
 use crate::{
-    ffi::{BootConfig, MagiskInit, magisk_proxy_main},
+    ffi::{BootConfig, SunnyInit, sunny_proxy_main},
     logging::setup_klog,
 };
 use base::{
@@ -15,7 +15,7 @@ use std::{
     ptr::null,
 };
 
-impl MagiskInit {
+impl SunnyInit {
     fn new(argv: *mut *mut c_char) -> Self {
         Self {
             preinit_dev: String::new(),
@@ -43,11 +43,13 @@ impl MagiskInit {
 
         // 根据 /sdcard 是否存在，选择不同的初始化方式
         if !cstr!("/sdcard").exists() && !cstr!("/first_stage_ramdisk/sdcard").exists() {
+            // /sdcard 不存在，进行两阶段挂载系统根目录
             self.hijack_init_with_switch_root();  // 切换根目录劫持 init
             self.restore_ramdisk_init();  // 恢复原始 init
         } else {
             self.restore_ramdisk_init();
             // Fallback to hexpatch if /sdcard exists
+            // 在这个函数里，将/system/bin/init 重定向到 /data/sunnyinit
             hexpatch_init_for_second_stage(true);  // 对第二阶段进行十六进制补丁
         }
     }
@@ -133,8 +135,11 @@ impl MagiskInit {
             // 类似 C 的 mount 系统调用
             unsafe {
                 mount(
+                    // 设备 / 文件系统源（source）：对于 proc 这类虚拟文件系统，此参数通常设为文件系统类型名（"proc"）即可，无需实际设备路径。
                     raw_cstr!("proc"),
+                    // 挂载点（target）：指定文件系统要挂载到的目录（此处为 /proc 目录）。
                     raw_cstr!("/proc"),
+                    // 文件系统类型（filesystemtype）：指定要挂载的文件系统类型（此处为 proc 类型）。
                     raw_cstr!("proc"),
                     0,
                     null(),
@@ -159,7 +164,7 @@ impl MagiskInit {
             self.mount_list.push("/sys".to_string());
         }
 
-        setup_klog();  // 初始化日志
+        setup_klog();  // 日志初始化配置
 
         self.config.init();  // 初始化配置
         
@@ -198,12 +203,12 @@ pub unsafe extern "C" fn main(
 
         let name = basename(*argv);
 
-        if CStr::from_ptr(name) == c"magisk" {
-            return magisk_proxy_main(argc, argv);
+        if CStr::from_ptr(name) == c"sunny" {
+            return sunny_proxy_main(argc, argv);
         }
 
         if getpid() == 1 {
-            MagiskInit::new(argv).start().log_ok();
+            SunnyInit::new(argv).start().log_ok();
         }
 
         1

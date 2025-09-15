@@ -1,5 +1,5 @@
 use crate::consts::{LOG_PIPE, LOGFILE};
-use crate::ffi::get_magisk_tmp;
+use crate::ffi::get_sunny_tmp;
 use crate::logging::LogFile::{Actual, Buffer};
 use base::libc::{
     O_CLOEXEC, O_RDWR, O_WRONLY, PIPE_BUF, SIG_BLOCK, SIG_SETMASK, SIGPIPE, getpid, gettid,
@@ -59,7 +59,7 @@ fn level_to_prio(level: LogLevel) -> i32 {
 
 fn android_log_write(level: LogLevel, msg: &Utf8CStr) {
     unsafe {
-        __android_log_write(level_to_prio(level), raw_cstr!("Magisk"), msg.as_ptr());
+        __android_log_write(level_to_prio(level), raw_cstr!("Sunny"), msg.as_ptr());
     }
 }
 
@@ -73,14 +73,14 @@ pub fn android_logging() {
     }
 }
 
-pub fn magisk_logging() {
-    fn magisk_log_write(level: LogLevel, msg: &Utf8CStr) {
+pub fn sunny_logging() {
+    fn sunny_log_write(level: LogLevel, msg: &Utf8CStr) {
         android_log_write(level, msg);
-        magisk_log_to_pipe(level_to_prio(level), msg);
+        sunny_log_to_pipe(level_to_prio(level), msg);
     }
 
     let logger = Logger {
-        write: magisk_log_write,
+        write: sunny_log_write,
         flags: 0,
     };
     unsafe {
@@ -138,19 +138,19 @@ fn write_log_to_pipe(mut logd: &File, prio: i32, msg: &Utf8CStr) -> io::Result<u
     result
 }
 
-static MAGISK_LOGD_FD: Mutex<Option<Arc<File>>> = Mutex::new(None);
+static SUNNY_LOGD_FD: Mutex<Option<Arc<File>>> = Mutex::new(None);
 
 fn with_logd_fd<R, F: FnOnce(&File) -> io::Result<R>>(f: F) {
-    let fd = MAGISK_LOGD_FD.lock().unwrap().clone();
+    let fd = SUNNY_LOGD_FD.lock().unwrap().clone();
     if let Some(logd) = fd
         && f(&logd).is_err()
     {
         // If any error occurs, shut down the logd pipe
-        *MAGISK_LOGD_FD.lock().unwrap() = None;
+        *SUNNY_LOGD_FD.lock().unwrap() = None;
     }
 }
 
-fn magisk_log_to_pipe(prio: i32, msg: &Utf8CStr) {
+fn sunny_log_to_pipe(prio: i32, msg: &Utf8CStr) {
     with_logd_fd(|logd| write_log_to_pipe(logd, prio, msg));
 }
 
@@ -173,7 +173,7 @@ pub fn zygisk_get_logd() -> i32 {
     // to pass FD checks, just to have it re-initialized immediately after any
     // logging happens ¯\_(ツ)_/¯.
     //
-    // To be consistent with this behavior, we also have to close the log pipe to magiskd
+    // To be consistent with this behavior, we also have to close the log pipe to sunnyd
     // to make zygote NOT crash if necessary. We accomplish this by hooking __android_log_close
     // and closing it at the same time as the rest of logging FDs.
 
@@ -181,7 +181,7 @@ pub fn zygisk_get_logd() -> i32 {
     if fd < 0 {
         android_logging();
         let path = cstr::buf::default()
-            .join_path(get_magisk_tmp())
+            .join_path(get_sunny_tmp())
             .join_path(LOG_PIPE);
         // Open as RW as sometimes it may block
         fd = unsafe { libc::open(path.as_ptr(), O_RDWR | O_CLOEXEC) };
@@ -340,7 +340,7 @@ extern "C" fn logfile_writer(arg: *mut c_void) -> *mut c_void {
 
     writer_loop(arg as RawFd).ok();
     // If any error occurs, shut down the logd pipe
-    *MAGISK_LOGD_FD.lock().unwrap() = None;
+    *SUNNY_LOGD_FD.lock().unwrap() = None;
     null_mut()
 }
 
@@ -358,7 +358,7 @@ pub fn setup_logfile() {
 
 pub fn start_log_daemon() {
     let path = cstr::buf::default()
-        .join_path(get_magisk_tmp())
+        .join_path(get_sunny_tmp())
         .join_path(LOG_PIPE);
 
     unsafe {
@@ -366,7 +366,7 @@ pub fn start_log_daemon() {
         libc::chown(path.as_ptr(), 0, 0);
         let read = libc::open(path.as_ptr(), O_RDWR | O_CLOEXEC);
         let write = libc::open(path.as_ptr(), O_WRONLY | O_CLOEXEC);
-        *MAGISK_LOGD_FD.lock().unwrap() = Some(Arc::new(File::from_raw_fd(write)));
+        *SUNNY_LOGD_FD.lock().unwrap() = Some(Arc::new(File::from_raw_fd(write)));
         new_daemon_thread(logfile_writer, read as *mut c_void);
     }
 }

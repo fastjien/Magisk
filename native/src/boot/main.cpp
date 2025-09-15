@@ -1,7 +1,7 @@
 #include <base.hpp>
 
 #include "boot-rs.hpp"
-#include "magiskboot.hpp"
+#include "sunnyboot.hpp"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ static void print_formats() {
 
 static void usage(char *arg0) {
     fprintf(stderr,
-R"EOF(MagiskBoot - Boot Image Modification Tool
+R"EOF(SunnyBoot - Boot Image Modification Tool
 
 Usage: %s <action> [args...]
 

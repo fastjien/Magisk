@@ -16,7 +16,7 @@ object Const {
     // Paths
     const val MODULE_PATH = "/data/adb/modules"
     const val TMPDIR = "/dev/tmp"
-    const val MAGISK_LOG = "/cache/magisk.log"
+    const val SUNNY_LOG = "/cache/sunny.log"
 
     // Misc
     val USER_ID = Process.myUid() / 100000
@@ -55,7 +55,7 @@ object Const {
     object Value {
         const val FLASH_ZIP = "flash"
         const val PATCH_FILE = "patch"
-        const val FLASH_MAGISK = "magisk"
+        const val FLASH_SUNNY = "sunny"
         const val FLASH_INACTIVE_SLOT = "slot"
         const val UNINSTALL = "uninstall"
     }

@@ -1,6 +1,6 @@
-#MAGISK
+#SUNNY
 ############################################
-# Magisk Uninstaller (updater-script)
+# Sunny Uninstaller (updater-script)
 ############################################
 
 ##############
@@ -28,17 +28,17 @@ setup_flashable
 # Detection
 ############
 
-if echo $MAGISK_VER | grep -q '\.'; then
-  PRETTY_VER=$MAGISK_VER
+if echo $SUNNY_VER | grep -q '\.'; then
+  PRETTY_VER=$SUNNY_VER
 else
-  PRETTY_VER="$MAGISK_VER($MAGISK_VER_CODE)"
+  PRETTY_VER="$SUNNY_VER($SUNNY_VER_CODE)"
 fi
-print_title "Magisk $PRETTY_VER Uninstaller"
+print_title "Sunny $PRETTY_VER Uninstaller"
 
-is_mounted /data || mount /data || abort "! Unable to mount /data, please uninstall with the Magisk app"
+is_mounted /data || mount /data || abort "! Unable to mount /data, please uninstall with the Sunny app"
 mount_partitions
 check_data
-$DATA_DE || abort "! Cannot access /data, please uninstall with the Magisk app"
+$DATA_DE || abort "! Cannot access /data, please uninstall with the Sunny app"
 get_flags
 find_boot_image
 
@@ -72,7 +72,7 @@ if [ -c $BOOTIMAGE ]; then
   BOOTNAND=$BOOTIMAGE
   BOOTIMAGE=boot.img
 fi
-./magiskboot unpack "$BOOTIMAGE"
+./sunnyboot unpack "$BOOTIMAGE"
 
 case $? in
   1 )
@@ -90,7 +90,7 @@ esac
 # Detect boot image state
 ui_print "- Checking ramdisk status"
 if [ -e ramdisk.cpio ]; then
-  ./magiskboot cpio ramdisk.cpio test
+  ./sunnyboot cpio ramdisk.cpio test
   STATUS=$?
 else
   # Stock A only system-as-root
@@ -100,16 +100,16 @@ case $((STATUS & 3)) in
   0 )  # Stock boot
     ui_print "- Stock boot image detected"
     ;;
-  1 )  # Magisk patched
-    ui_print "- Magisk patched image detected"
+  1 )  # Sunny patched
+    ui_print "- Sunny patched image detected"
     # Find SHA1 of stock boot image
-    ./magiskboot cpio ramdisk.cpio "extract .backup/.magisk config.orig"
+    ./sunnyboot cpio ramdisk.cpio "extract .backup/.sunny config.orig"
     if [ -f config.orig ]; then
       chmod 0644 config.orig
       SHA1=$(grep_prop SHA1 config.orig)
       rm config.orig
     fi
-    BACKUPDIR=/data/magisk_backup_$SHA1
+    BACKUPDIR=/data/sunny_backup_$SHA1
     if [ -d $BACKUPDIR ]; then
       ui_print "- Restoring stock boot image"
       flash_image $BACKUPDIR/boot.img.gz $BOOTIMAGE
@@ -123,12 +123,12 @@ case $((STATUS & 3)) in
     else
       ui_print "! Boot image backup unavailable"
       ui_print "- Restoring ramdisk with internal backup"
-      ./magiskboot cpio ramdisk.cpio restore
-      if ! ./magiskboot cpio ramdisk.cpio "exists init"; then
+      ./sunnyboot cpio ramdisk.cpio restore
+      if ! ./sunnyboot cpio ramdisk.cpio "exists init"; then
         # A only system-as-root
         rm -f ramdisk.cpio
       fi
-      ./magiskboot repack $BOOTIMAGE
+      ./sunnyboot repack $BOOTIMAGE
       # Sign chromeos boot
       $CHROMEOS && sign_chromeos
       ui_print "- Flashing restored boot image"
@@ -143,17 +143,17 @@ esac
 
 if $BOOTMODE; then
   ui_print "- Removing modules"
-  magisk --remove-modules -n
+  sunny --remove-modules -n
 fi
 
-ui_print "- Removing Magisk files"
+ui_print "- Removing Sunny files"
 rm -rf \
-/cache/*magisk* /cache/unblock /data/*magisk* /data/cache/*magisk* /data/property/*magisk* \
-/data/Magisk.apk /data/busybox /data/custom_ramdisk_patch.sh /data/adb/*magisk* \
+/cache/*sunny* /cache/unblock /data/*sunny* /data/cache/*sunny* /data/property/*sunny* \
+/data/Sunny.apk /data/busybox /data/custom_ramdisk_patch.sh /data/adb/*sunny* \
 /data/adb/post-fs-data.d /data/adb/service.d /data/adb/modules* \
-/data/unencrypted/magisk /metadata/magisk /metadata/watchdog/magisk /persist/magisk /mnt/vendor/persist/magisk
+/data/unencrypted/sunny /metadata/sunny /metadata/watchdog/sunny /persist/sunny /mnt/vendor/persist/sunny
 
-ADDOND=/system/addon.d/99-magisk.sh
+ADDOND=/system/addon.d/99-sunny.sh
 if [ -f $ADDOND ]; then
   blockdev --setrw /dev/block/mapper/system$SLOT 2>/dev/null
   mount -o rw,remount /system || mount -o rw,remount /
@@ -164,13 +164,13 @@ cd /
 
 if $BOOTMODE; then
   ui_print "********************************************"
-  ui_print " The Magisk app will uninstall itself, and"
+  ui_print " The Sunny app will uninstall itself, and"
   ui_print " the device will reboot after a few seconds"
   ui_print "********************************************"
   (sleep 8; /system/bin/reboot)&
 else
   ui_print "********************************************"
-  ui_print " The Magisk app will not be uninstalled"
+  ui_print " The Sunny app will not be uninstalled"
   ui_print " Please uninstall it manually after reboot"
   ui_print "********************************************"
   recovery_cleanup

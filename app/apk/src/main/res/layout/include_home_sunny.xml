@@ -31,55 +31,55 @@
             tools:layout_gravity="center">
 
             <ImageView
-                android:id="@+id/home_magisk_icon"
+                android:id="@+id/home_sunny_icon"
                 style="@style/WidgetFoundation.Icon.Primary"
                 android:contentDescription="@null"
                 android:padding="@dimen/l_25"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_magisk_outline" />
+                app:srcCompat="@drawable/ic_sunny_outline" />
 
             <TextView
-                android:id="@+id/home_magisk_title"
+                android:id="@+id/home_sunny_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/l1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@string/magisk"
+                android:text="@string/sunny"
                 android:textAppearance="@style/AppearanceFoundation.Title"
                 android:textColor="?colorPrimary"
-                app:layout_constraintBottom_toBottomOf="@+id/home_magisk_icon"
-                app:layout_constraintEnd_toStartOf="@+id/home_magisk_button"
-                app:layout_constraintStart_toEndOf="@+id/home_magisk_icon"
-                app:layout_constraintTop_toTopOf="@+id/home_magisk_icon" />
+                app:layout_constraintBottom_toBottomOf="@+id/home_sunny_icon"
+                app:layout_constraintEnd_toStartOf="@+id/home_sunny_button"
+                app:layout_constraintStart_toEndOf="@+id/home_sunny_icon"
+                app:layout_constraintTop_toTopOf="@+id/home_sunny_icon" />
 
             <FrameLayout
-                android:id="@+id/home_magisk_button"
+                android:id="@+id/home_sunny_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="@+id/home_magisk_title"
+                app:layout_constraintBottom_toBottomOf="@+id/home_sunny_title"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/home_magisk_title">
+                app:layout_constraintTop_toTopOf="@+id/home_sunny_title">
 
                 <Button
                     style="@style/WidgetFoundation.Button"
-                    gone="@{viewModel.magiskState != State.OUTDATED}"
+                    gone="@{viewModel.sunnyState != State.OUTDATED}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:onClick="@{() -> viewModel.onMagiskPressed()}"
+                    android:onClick="@{() -> viewModel.onSunnyPressed()}"
                     android:text="@string/update"
                     android:textAllCaps="false"
                     app:icon="@drawable/ic_update_md2" />
 
                 <Button
                     style="@style/WidgetFoundation.Button.Text"
-                    gone="@{viewModel.magiskState == State.OUTDATED}"
+                    gone="@{viewModel.sunnyState == State.OUTDATED}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:onClick="@{() -> viewModel.onMagiskPressed()}"
+                    android:onClick="@{() -> viewModel.onSunnyPressed()}"
                     android:text="@string/install"
                     android:textAllCaps="false"
                     app:icon="@drawable/ic_install" />
@@ -87,11 +87,11 @@
             </FrameLayout>
 
             <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/home_magisk_title_barrier"
+                android:id="@+id/home_sunny_title_barrier"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:referencedIds="@{viewModel.magiskTitleBarrierIds}"
+                app:referencedIds="@{viewModel.sunnyTitleBarrierIds}"
                 tools:constraint_referenced_ids="home_magisk_icon,home_magisk_title,home_magisk_button" />
 
             <HorizontalScrollView
@@ -100,7 +100,7 @@
                 android:fadingEdgeLength="@dimen/l1"
                 android:requiresFadingEdge="horizontal"
                 android:scrollbars="none"
-                app:layout_constraintTop_toBottomOf="@+id/home_magisk_title_barrier">
+                app:layout_constraintTop_toBottomOf="@+id/home_sunny_title_barrier">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -112,7 +112,7 @@
                         android:layout_height="wrap_content">
 
                         <LinearLayout
-                            android:id="@+id/home_magisk_installed_version"
+                            android:id="@+id/home_sunny_installed_version"
                             style="@style/W.Home.Item.Top"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent">
@@ -123,7 +123,7 @@
 
                             <TextView
                                 style="@style/W.Home.ItemContent.Right"
-                                android:text="@{viewModel.magiskInstalledVersion}"
+                                android:text="@{viewModel.sunnyInstalledVersion}"
                                 tools:text="22.0 (22000)" />
 
                         </LinearLayout>
@@ -131,8 +131,8 @@
                         <LinearLayout
                             android:id="@+id/home_device_details_zygisk"
                             style="@style/W.Home.Item"
-                            app:layout_constraintStart_toStartOf="@+id/home_magisk_installed_version"
-                            app:layout_constraintTop_toBottomOf="@+id/home_magisk_installed_version">
+                            app:layout_constraintStart_toStartOf="@+id/home_sunny_installed_version"
+                            app:layout_constraintTop_toBottomOf="@+id/home_sunny_installed_version">
 
                             <TextView
                                 style="@style/W.Home.ItemContent"
@@ -148,7 +148,7 @@
                         <LinearLayout
                             android:id="@+id/home_device_details_ramdisk"
                             style="@style/W.Home.Item.Bottom"
-                            app:layout_constraintStart_toStartOf="@+id/home_magisk_installed_version"
+                            app:layout_constraintStart_toStartOf="@+id/home_sunny_installed_version"
                             app:layout_constraintTop_toBottomOf="@+id/home_device_details_zygisk">
 
                             <TextView

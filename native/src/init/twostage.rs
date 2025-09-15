@@ -1,4 +1,4 @@
-use crate::ffi::MagiskInit;
+use crate::ffi::SunnyInit;
 use base::{
     LoggedResult, MappedFile, MutBytesExt, ResultExt, cstr, debug, error,
     libc::{O_CLOEXEC, O_CREAT, O_RDONLY, O_WRONLY},
@@ -17,9 +17,9 @@ pub(crate) fn hexpatch_init_for_second_stage(writable: bool) {
         return;
     };
 
-    // Redirect original init to magiskinit
+    // Redirect original init to sunnyinit
     let from = "/system/bin/init";
-    let to = "/data/magiskinit";
+    let to = "/data/sunnyinit";
     let v = init.patch(from.as_bytes(), to.as_bytes());
     #[allow(unused_variables)]
     for off in &v {
@@ -42,10 +42,10 @@ pub(crate) fn hexpatch_init_for_second_stage(writable: bool) {
     }
 }
 
-impl MagiskInit {
+impl SunnyInit {
     pub(crate) fn hijack_init_with_switch_root(&self) {
         // We make use of original init's `SwitchRoot` to help us bind mount
-        // magiskinit to /system/bin/init to hijack second stage init.
+        // sunnyinit to /system/bin/init to hijack second stage init.
         //
         // Two important assumption about 2SI:
         // - The second stage init is always /system/bin/init
@@ -55,14 +55,14 @@ impl MagiskInit {
         // - Recursive move all mounts under `/` to `/system`
         // - chroot to `/system`
         //
-        // The trick here is that in Magisk's first stage init, we can mount magiskinit to /sdcard,
+        // The trick here is that in Sunny's first stage init, we can mount sunnyinit to /sdcard,
         // and create a symlink at /storage/self/primary pointing to /system/system/bin/init.
         //
-        // During init's `SwitchRoot`, it will mount move /sdcard (which is magiskinit)
+        // During init's `SwitchRoot`, it will mount move /sdcard (which is sunnyinit)
         // to /system/sdcard, which is a symlink to /storage/self/primary, which is a
         // symlink to /system/system/bin/init, which will eventually become /system/bin/init after
         // chroot to /system. The effective result is that we coerce the original init into bind
-        // mounting magiskinit to /system/bin/init, successfully hijacking the second stage init.
+        // mounting sunnyinit to /system/bin/init, successfully hijacking the second stage init.
         //
         // An edge case is that some devices (like meizu) use 2SI but does not switch root.
         // In that case, they must already have a /sdcard in ramfs, thus we can check if
@@ -88,7 +88,7 @@ impl MagiskInit {
         }
         cstr!("/init").rename_to(cstr!("/sdcard")).log_ok();
 
-        // First try to mount magiskinit from rootfs to workaround Samsung RKP
+        // First try to mount sunnyinit from rootfs to workaround Samsung RKP
         if cstr!("/sdcard")
             .bind_mount_to(cstr!("/sdcard"), false)
             .is_ok()
@@ -96,10 +96,10 @@ impl MagiskInit {
             debug!("Bind mount /sdcard -> /sdcard");
         } else {
             // Binding mounting from rootfs is not supported before Linux 3.12
-            cstr!("/data/magiskinit")
+            cstr!("/data/sunnyinit")
                 .bind_mount_to(cstr!("/sdcard"), false)
                 .log_ok();
-            debug!("Bind mount /data/magiskinit -> /sdcard");
+            debug!("Bind mount /data/sunnyinit -> /sdcard");
         }
     }
 }

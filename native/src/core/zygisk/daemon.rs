@@ -1,7 +1,7 @@
 use crate::consts::MODULEROOT;
-use crate::daemon::{MagiskD, to_user_id};
+use crate::daemon::{SunnyD, to_user_id};
 use crate::ffi::{
-    ZygiskRequest, ZygiskStateFlags, get_magisk_tmp, restore_zygisk_prop, update_deny_flags,
+    ZygiskRequest, ZygiskStateFlags, get_sunny_tmp, restore_zygisk_prop, update_deny_flags,
 };
 use crate::socket::{IpcRead, UnixSocketExt};
 use base::libc::{O_CLOEXEC, O_CREAT, O_RDONLY, STDOUT_FILENO};
@@ -19,7 +19,7 @@ const UNMOUNT_MASK: u32 =
     ZygiskStateFlags::ProcessOnDenyList.repr | ZygiskStateFlags::DenyListEnforced.repr;
 
 pub fn zygisk_should_load_module(flags: u32) -> bool {
-    flags & UNMOUNT_MASK != UNMOUNT_MASK && flags & ZygiskStateFlags::ProcessIsMagiskApp.repr == 0
+    flags & UNMOUNT_MASK != UNMOUNT_MASK && flags & ZygiskStateFlags::ProcessIsSunnyApp.repr == 0
 }
 
 #[allow(unused_variables)]
@@ -32,14 +32,14 @@ fn exec_zygiskd(is_64_bit: bool, remote: UnixStream) {
     // Start building the exec arguments
 
     #[cfg(target_pointer_width = "64")]
-    let magisk = if is_64_bit { "magisk" } else { "magisk32" };
+    let sunny = if is_64_bit { "sunny" } else { "sunny32" };
 
     #[cfg(target_pointer_width = "32")]
-    let magisk = "magisk";
+    let sunny = "sunny";
 
     let exe = cstr::buf::new::<64>()
-        .join_path(get_magisk_tmp())
-        .join_path(magisk);
+        .join_path(get_sunny_tmp())
+        .join_path(sunny);
 
     let mut fd_str = cstr::buf::new::<16>();
     write!(fd_str, "{}", remote.as_raw_fd()).ok();
@@ -56,7 +56,7 @@ fn exec_zygiskd(is_64_bit: bool, remote: UnixStream) {
     }
 }
 
-impl MagiskD {
+impl SunnyD {
     pub fn zygisk_handler(&self, client: i32) {
         let mut client = unsafe { UnixStream::from_raw_fd(client) };
         let _: LoggedResult<()> = try {
@@ -99,7 +99,7 @@ impl MagiskD {
                 .map(|m| if is_64_bit { m.z64 } else { m.z32 })
                 // All fds passed over sockets have to be valid file descriptors.
                 // To work around this issue, send over STDOUT_FILENO as an indicator of an
-                // invalid fd as it will always be /dev/null in magiskd.
+                // invalid fd as it will always be /dev/null in sunnyd.
                 .map(|fd| if fd < 0 { STDOUT_FILENO } else { fd })
                 .collect()
         })
@@ -160,7 +160,7 @@ impl MagiskD {
         let mut flags: u32 = 0;
         update_deny_flags(uid, &process, &mut flags);
         if self.get_manager_uid(to_user_id(uid)) == uid {
-            flags |= ZygiskStateFlags::ProcessIsMagiskApp.repr
+            flags |= ZygiskStateFlags::ProcessIsSunnyApp.repr
         }
         if self.uid_granted_root(uid) {
             flags |= ZygiskStateFlags::ProcessGrantedRoot.repr

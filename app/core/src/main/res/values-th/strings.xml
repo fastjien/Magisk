@@ -42,8 +42,8 @@
     <string name="invalid_update_channel">ช่องทางการอัปเดตไม่ถูกต้อง</string>
     <string name="keep_force_encryption">เก็บค่าบังคับการเข้ารหัส</string>
     <string name="keep_dm_verity">เก็บค่า AVB 2.0/dm-verity</string>
-    <string name="uninstall_magisk_title">ถอนการติดตั้ง Magisk</string>
-    <string name="uninstall_magisk_msg">โมดูลทั้งหมดจะถูกปิดการใช้งาน/ถูกลบ, สิทธิการเข้าถึง Root จะถูกลบ และข้อมูลของคุณอาจถูกเข้ารหัส</string>
+    <string name="uninstall_sunny_title">ถอนการติดตั้ง Magisk</string>
+    <string name="uninstall_sunny_msg">โมดูลทั้งหมดจะถูกปิดการใช้งาน/ถูกลบ, สิทธิการเข้าถึง Root จะถูกลบ และข้อมูลของคุณอาจถูกเข้ารหัส</string>
     <string name="update">อัปเดต</string>
 
     <!--Module Fragment-->
@@ -69,7 +69,7 @@
     <string name="progress_channel">สถานะ</string>
     <string name="download_complete">ดาวน์โหลดสำเร็จ</string>
     <string name="download_file_error">เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์</string>
-    <string name="magisk_update_title">มีการอัปเดต Magisk!</string>
+    <string name="sunny_update_title">มีการอัปเดต Magisk!</string>
 
     <!--Toasts, Dialogs-->
     <string name="repo_install_title">ติดตั้ง %1$s %2$s(%3$d)</string>
@@ -176,7 +176,7 @@
 
     <!--Logs-->
     <string name="log_data_none">You\'re log-free. Try using your root apps more.</string>
-    <string name="log_data_magisk_none">Magisk logs are empty, that\'s weird.</string>
+    <string name="log_data_sunny_none">Magisk logs are empty, that\'s weird.</string>
     <string name="pid">PID: %1$d</string>
     <string name="target_pid">Target PID: %s</string>
     <string name="selinux_context">SELinux context: %s</string>
@@ -255,8 +255,8 @@
     <string name="hide_app_title">Hiding the Magisk app…</string>
     <string name="env_fix_msg">Your device needs additional setup for Magisk to work properly. Do you want to proceed and reboot?</string>
     <string name="env_full_fix_msg">Your device needs reflash Magisk to work properly. Please reinstall Magisk within app, Recovery mode cannot get correct device info.</string>
-    <string name="unsupport_magisk_title">Unsupported Magisk version</string>
-    <string name="unsupport_magisk_msg">This version of the app doesn\'t support Magisk versions lower than %1$s.\n\nThe app will behave as if no Magisk is installed. Please update Magisk as soon as possible.</string>
+    <string name="unsupport_sunny_title">Unsupported Magisk version</string>
+    <string name="unsupport_sunny_msg">This version of the app doesn\'t support Magisk versions lower than %1$s.\n\nThe app will behave as if no Magisk is installed. Please update Magisk as soon as possible.</string>
     <string name="unsupport_general_title">Abnormal state</string>
     <string name="unsupport_system_app_msg">Running this app as a system app isn\'t supported. Please revert the app to a user app.</string>
     <string name="unsupport_other_su_msg">A \"su\" binary not from Magisk has been detected. Please remove any competing root solution and/or reinstall Magisk.</string>

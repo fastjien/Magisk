@@ -1,11 +1,11 @@
-package com.fastjien.sunny.core.data.magiskdb
+package com.fastjien.sunny.core.data.sunnydb
 
 import com.fastjien.sunny.core.ktx.await
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-open class MagiskDB {
+open class SunnyDB {
 
     class Literal(
         val str: String
@@ -16,7 +16,7 @@ open class MagiskDB {
         crossinline mapper: (Map<String, String>) -> R
     ): List<R> {
         return withContext(Dispatchers.IO) {
-            val out = Shell.cmd("magisk --sqlite '$query'").await().out
+            val out = Shell.cmd("sunny --sqlite '$query'").await().out
             out.map { line ->
                 line.split("\\|".toRegex())
                     .map { it.split("=", limit = 2) }
@@ -29,7 +29,7 @@ open class MagiskDB {
 
     suspend fun exec(query: String) {
         withContext(Dispatchers.IO) {
-            Shell.cmd("magisk --sqlite '$query'").await()
+            Shell.cmd("sunny --sqlite '$query'").await()
         }
     }
 

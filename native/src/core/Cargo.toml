@@ -1,5 +1,5 @@
 [package]
-name = "magisk"
+name = "sunny"
 version.workspace = true
 edition.workspace = true
 

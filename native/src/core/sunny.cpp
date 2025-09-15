@@ -10,10 +10,10 @@ using namespace std;
 
 [[noreturn]] static void usage() {
     fprintf(stderr,
-R"EOF(Magisk - Multi-purpose Utility
+R"EOF(Sunny - Multi-purpose Utility
 
-Usage: magisk [applet [arguments]...]
-   or: magisk [options]...
+Usage: sunny [applet [arguments]...]
+   or: sunny [options]...
 
 Options:
    -c                        print current binary version
@@ -24,16 +24,16 @@ Options:
    --install-module ZIP      install a module zip file
 
 Advanced Options (Internal APIs):
-   --daemon                  manually start magisk daemon
-   --stop                    remove all magisk changes and stop daemon
+   --daemon                  manually start sunny daemon
+   --stop                    remove all sunny changes and stop daemon
    --[init trigger]          callback on init triggers. Valid triggers:
                              post-fs-data, service, boot-complete, zygote-restart
    --unlock-blocks           set BLKROSET flag to OFF for all block devices
-   --restorecon              restore selinux context on Magisk files
+   --restorecon              restore selinux context on Sunny files
    --clone-attr SRC DEST     clone permission, owner, and selinux context
    --clone SRC DEST          clone SRC to DEST
-   --sqlite SQL              exec SQL commands to Magisk database
-   --path                    print Magisk tmpfs mount path
+   --sqlite SQL              exec SQL commands to Sunny database
+   --path                    print Sunny tmpfs mount path
    --denylist ARGS           denylist config CLI
    --preinit-device          resolve a device to store preinit files
 
@@ -49,14 +49,14 @@ Available applets:
 #define quote(s) #s
 #define str(s)   quote(s)
 
-int magisk_main(int argc, char *argv[]) {
+int sunny_main(int argc, char *argv[]) {
     if (argc < 2)
         usage();
     if (argv[1] == "-c"sv) {
-#if MAGISK_DEBUG
-        printf(MAGISK_VERSION ":MAGISK:D (" str(MAGISK_VER_CODE) ")\n");
+#if SUNNY_DEBUG
+        printf(SUNNY_VERSION ":SUNNY:D (" str(SUNNY_VER_CODE) ")\n");
 #else
-        printf(MAGISK_VERSION ":MAGISK:R (" str(MAGISK_VER_CODE) ")\n");
+        printf(SUNNY_VERSION ":SUNNY:R (" str(SUNNY_VER_CODE) ")\n");
 #endif
         return 0;
     } else if (argv[1] == "-v"sv) {
@@ -129,7 +129,7 @@ int magisk_main(int argc, char *argv[]) {
         write_int(fd, do_reboot);
         return read_int(fd);
     } else if (argv[1] == "--path"sv) {
-        const char *path = get_magisk_tmp();
+        const char *path = get_sunny_tmp();
         if (path[0] != '\0')  {
             printf("%s\n", path);
             return 0;

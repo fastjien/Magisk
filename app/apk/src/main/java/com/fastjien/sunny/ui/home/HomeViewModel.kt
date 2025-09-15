@@ -41,8 +41,8 @@ class HomeViewModel(
         LOADING, INVALID, OUTDATED, UP_TO_DATE
     }
 
-    val magiskTitleBarrierIds =
-        intArrayOf(R.id.home_magisk_icon, R.id.home_magisk_title, R.id.home_magisk_button)
+    val sunnyTitleBarrierIds =
+        intArrayOf(R.id.home_sunny_icon, R.id.home_sunny_title, R.id.home_sunny_button)
     val appTitleBarrierIds =
         intArrayOf(R.id.home_manager_icon, R.id.home_manager_title, R.id.home_manager_button)
 
@@ -50,7 +50,7 @@ class HomeViewModel(
     var isNoticeVisible = Config.safetyNotice
         set(value) = set(value, field, { field = it }, BR.noticeVisible)
 
-    val magiskState
+    val sunnyState
         get() = when {
             Info.isRooted && Info.env.isUnsupported -> State.OUTDATED
             !Info.env.isActive -> State.INVALID
@@ -62,7 +62,7 @@ class HomeViewModel(
     var appState = State.LOADING
         set(value) = set(value, field, { field = it }, BR.appState)
 
-    val magiskInstalledVersion
+    val sunnyInstalledVersion
         get() = Info.env.run {
             if (isActive)
                 ("$versionString ($versionCode)" + if (isDebug) " (D)" else "").asText()
@@ -143,7 +143,7 @@ class HomeViewModel(
         }
     }
 
-    fun onMagiskPressed() = withExternalRW {
+    fun onSunnyPressed() = withExternalRW {
         HomeFragmentDirections.actionHomeFragmentToInstallFragment().navigate()
     }
 
@@ -153,7 +153,7 @@ class HomeViewModel(
     }
 
     private suspend fun ensureEnv() {
-        if (magiskState == State.INVALID || checkedEnv) return
+        if (sunnyState == State.INVALID || checkedEnv) return
         val cmd = "env_check ${Info.env.versionString} ${Info.env.versionCode}"
         val code = Shell.cmd(cmd).await().code
         if (code != 0) {

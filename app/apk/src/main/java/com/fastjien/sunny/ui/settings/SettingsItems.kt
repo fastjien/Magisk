@@ -21,7 +21,7 @@ import com.fastjien.sunny.core.utils.MediaStoreUtils
 import com.fastjien.sunny.databinding.set
 import com.fastjien.sunny.utils.TextHolder
 import com.fastjien.sunny.utils.asText
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import com.topjohnwu.superuser.Shell
 import com.fastjien.sunny.core.R as CoreR
 
@@ -96,16 +96,16 @@ object Restore : BaseSettingsItem.Blank() {
 
     override fun onPressed(view: View, handler: Handler) {
         handler.onItemPressed(view, this) {
-            MagiskDialog(view.activity).apply {
+            SunnyDialog(view.activity).apply {
                 setTitle(CoreR.string.settings_restore_app_title)
                 setMessage(CoreR.string.restore_app_confirmation)
-                setButton(MagiskDialog.ButtonType.POSITIVE) {
+                setButton(SunnyDialog.ButtonType.POSITIVE) {
                     text = android.R.string.ok
                     onClick {
                         handler.onItemAction(view, this@Restore)
                     }
                 }
-                setButton(MagiskDialog.ButtonType.NEGATIVE) {
+                setButton(SunnyDialog.ButtonType.NEGATIVE) {
                     text = android.R.string.cancel
                 }
                 setCancelable(true)
@@ -198,10 +198,10 @@ object RandNameToggle : BaseSettingsItem.Toggle() {
     override var value by Config::randName
 }
 
-// --- Magisk
+// --- Sunny
 
-object Magisk : BaseSettingsItem.Section() {
-    override val title = CoreR.string.magisk.asText()
+object Sunny : BaseSettingsItem.Section() {
+    override val title = CoreR.string.sunny.asText()
 }
 
 object Zygisk : BaseSettingsItem.Toggle() {
@@ -227,7 +227,7 @@ object DenyList : BaseSettingsItem.Toggle() {
         set(value) {
             field = value
             val cmd = if (value) "enable" else "disable"
-            Shell.cmd("magisk --denylist $cmd").submit { result ->
+            Shell.cmd("sunny --denylist $cmd").submit { result ->
                 if (result.isSuccess) {
                     Config.denyList = value
                 } else {

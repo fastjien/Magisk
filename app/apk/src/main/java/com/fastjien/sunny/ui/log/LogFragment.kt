@@ -60,7 +60,7 @@ class LogFragment : BaseFragment<FragmentLogMd2Binding>(), MenuProvider {
         }
 
         if (!AccessibilityUtils.isAnimationEnabled(requireContext().contentResolver)) {
-            val scrollView = view.findViewById<HorizontalScrollView>(R.id.log_scroll_magisk)
+            val scrollView = view.findViewById<HorizontalScrollView>(R.id.log_scroll_sunny)
             scrollView.setOverScrollMode(View.OVER_SCROLL_NEVER)
         }
     }

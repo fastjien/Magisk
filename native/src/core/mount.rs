@@ -12,14 +12,14 @@ use base::{
 };
 
 use crate::consts::{MODULEMNT, MODULEROOT, PREINITDEV, PREINITMIRR, WORKERDIR};
-use crate::ffi::{get_magisk_tmp, get_prop, resolve_preinit_dir, switch_mnt_ns};
+use crate::ffi::{get_sunny_tmp, get_prop, resolve_preinit_dir, switch_mnt_ns};
 
 pub fn setup_preinit_dir() {
-    let magisk_tmp = get_magisk_tmp();
+    let sunny_tmp = get_sunny_tmp();
 
     // Mount preinit directory
     let dev_path = cstr::buf::new::<64>()
-        .join_path(magisk_tmp)
+        .join_path(sunny_tmp)
         .join_path(PREINITDEV);
     if let Ok(attr) = dev_path.get_attr()
         && attr.st.st_mode & libc::S_IFMT as c_uint == libc::S_IFBLK.as_()
@@ -31,7 +31,7 @@ pub fn setup_preinit_dir() {
         // mount point mounting our desired partition, and then bind mount the target folder.
         let preinit_dev = attr.st.st_rdev;
         let mnt_path = cstr::buf::default()
-            .join_path(magisk_tmp)
+            .join_path(sunny_tmp)
             .join_path(PREINITMIRR);
         for info in parse_mount_info("self") {
             if info.root == "/" && info.device == preinit_dev {
@@ -63,7 +63,7 @@ pub fn setup_preinit_dir() {
 pub fn setup_module_mount() {
     // Bind remount module root to clear nosuid
     let module_mnt = cstr::buf::default()
-        .join_path(get_magisk_tmp())
+        .join_path(get_sunny_tmp())
         .join_path(MODULEMNT);
     let _: LoggedResult<()> = try {
         module_mnt.mkdir(0o755)?;
@@ -73,15 +73,15 @@ pub fn setup_module_mount() {
 }
 
 pub fn clean_mounts() {
-    let magisk_tmp = get_magisk_tmp();
+    let sunny_tmp = get_sunny_tmp();
 
     let mut buf = cstr::buf::default();
 
-    let module_mnt = buf.append_path(magisk_tmp).append_path(MODULEMNT);
+    let module_mnt = buf.append_path(sunny_tmp).append_path(MODULEMNT);
     module_mnt.unmount().log_ok();
     buf.clear();
 
-    let worker_dir = buf.append_path(magisk_tmp).append_path(WORKERDIR);
+    let worker_dir = buf.append_path(sunny_tmp).append_path(WORKERDIR);
     let _: LoggedResult<()> = try {
         worker_dir.set_mount_private(true)?;
         worker_dir.unmount()?;
@@ -177,7 +177,7 @@ pub fn find_preinit_device() -> String {
     let mut target = info.target.clone();
     let mut preinit_dir = resolve_preinit_dir(Utf8CStr::from_string(&mut target));
     if unsafe { libc::getuid() } == 0
-        && let Ok(tmp) = std::env::var("MAGISKTMP")
+        && let Ok(tmp) = std::env::var("SUNNYTMP")
         && !tmp.is_empty()
     {
         let mut buf = cstr::buf::default();
@@ -223,9 +223,9 @@ pub fn revert_unmount(pid: i32) {
 
     let mut targets = Vec::new();
 
-    // Unmount Magisk tmpfs and mounts from module files
+    // Unmount Sunny tmpfs and mounts from module files
     for info in parse_mount_info("self") {
-        if info.source == "magisk" || info.root.starts_with("/adb/modules") {
+        if info.source == "sunny" || info.root.starts_with("/adb/modules") {
             targets.push(info.target);
         }
     }

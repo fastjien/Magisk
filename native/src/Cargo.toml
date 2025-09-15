@@ -1,12 +1,18 @@
 [workspace]
+# 排除external目录下的内容
 exclude = ["external"]
+# 成员包
 members = ["base", "boot", "core", "core/derive", "init", "sepolicy"]
+# 使用 Rust 2.0 版本的依赖解析器（解决依赖冲突的规则）
 resolver = "2"
 
 [workspace.package]
+# 工作区内所有成员包的默认版本
 version = "0.0.0"
+# 工作区内所有成员包默认使用的 Rust 版本
 edition = "2024"
 
+# 工作区内所有成员包的公共依赖
 [workspace.dependencies]
 cxx = { path = "external/cxx-rs" }
 cxx-gen = { path = "external/cxx-rs/gen/lib" }
@@ -44,6 +50,7 @@ rsa = "0.10.0-rc.3"
 x509-cert = "0.3.0-rc.1"
 der = "0.8.0-rc.7"
 
+# 依赖补丁（覆盖 crates.io 源）
 [patch.crates-io]
 pb-rs = { git = "https://github.com/tafia/quick-protobuf.git" }
 quick-protobuf = { git = "https://github.com/tafia/quick-protobuf.git" }

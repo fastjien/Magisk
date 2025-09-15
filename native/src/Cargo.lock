@@ -541,74 +541,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "magisk"
-version = "0.0.0"
-dependencies = [
- "base",
- "bit-set",
- "bytemuck",
- "cxx",
- "cxx-gen",
- "derive",
- "num-derive",
- "num-traits",
- "pb-rs",
- "quick-protobuf",
- "thiserror",
-]
-
-[[package]]
-name = "magiskboot"
-version = "0.0.0"
-dependencies = [
- "argh",
- "base",
- "bytemuck",
- "byteorder",
- "bzip2",
- "cxx",
- "cxx-gen",
- "der",
- "digest",
- "fdt",
- "flate2",
- "lz4",
- "num-traits",
- "p256",
- "p384",
- "p521",
- "pb-rs",
- "quick-protobuf",
- "rsa",
- "sha1",
- "sha2",
- "size",
- "x509-cert",
- "xz2",
- "zopfli",
-]
-
-[[package]]
-name = "magiskinit"
-version = "0.0.0"
-dependencies = [
- "base",
- "cxx",
- "cxx-gen",
- "magiskpolicy",
-]
-
-[[package]]
-name = "magiskpolicy"
-version = "0.0.0"
-dependencies = [
- "argh",
- "base",
- "cxx",
- "cxx-gen",
-]
-
-[[package]]
 name = "memchr"
 version = "2.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -957,6 +889,74 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "sunny"
+version = "0.0.0"
+dependencies = [
+ "base",
+ "bit-set",
+ "bytemuck",
+ "cxx",
+ "cxx-gen",
+ "derive",
+ "num-derive",
+ "num-traits",
+ "pb-rs",
+ "quick-protobuf",
+ "thiserror",
+]
+
+[[package]]
+name = "sunnyboot"
+version = "0.0.0"
+dependencies = [
+ "argh",
+ "base",
+ "bytemuck",
+ "byteorder",
+ "bzip2",
+ "cxx",
+ "cxx-gen",
+ "der",
+ "digest",
+ "fdt",
+ "flate2",
+ "lz4",
+ "num-traits",
+ "p256",
+ "p384",
+ "p521",
+ "pb-rs",
+ "quick-protobuf",
+ "rsa",
+ "sha1",
+ "sha2",
+ "size",
+ "x509-cert",
+ "xz2",
+ "zopfli",
+]
+
+[[package]]
+name = "sunnyinit"
+version = "0.0.0"
+dependencies = [
+ "base",
+ "cxx",
+ "cxx-gen",
+ "sunnypolicy",
+]
+
+[[package]]
+name = "sunnypolicy"
+version = "0.0.0"
+dependencies = [
+ "argh",
+ "base",
+ "cxx",
+ "cxx-gen",
+]
 
 [[package]]
 name = "syn"

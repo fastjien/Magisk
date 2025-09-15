@@ -161,7 +161,7 @@ void write_string(int fd, string_view str) {
 }
 
 static void handle_request_async(int client, int code, const sock_cred &cred) {
-    auto &daemon = MagiskD::Get();
+    auto &daemon = SunnyD::Get();
     switch (code) {
     case +RequestCode::DENYLIST:
         denylist_handler(client, &cred);
@@ -201,14 +201,14 @@ static void handle_request_async(int client, int code, const sock_cred &cred) {
 static void handle_request_sync(int client, int code) {
     switch (code) {
     case +RequestCode::CHECK_VERSION:
-#if MAGISK_DEBUG
-        write_string(client, MAGISK_VERSION ":MAGISK:D");
+#if SUNNY_DEBUG
+        write_string(client, SUNNY_VERSION ":SUNNY:D");
 #else
-        write_string(client, MAGISK_VERSION ":MAGISK:R");
+        write_string(client, SUNNY_VERSION ":SUNNY:R");
 #endif
         break;
     case +RequestCode::CHECK_VERSION_CODE:
-        write_int(client, MAGISK_VER_CODE);
+        write_int(client, SUNNY_VER_CODE);
         break;
     case +RequestCode::START_DAEMON:
         setup_logfile();
@@ -307,7 +307,7 @@ static void handle_request(pollfd *pfd) {
         exec_task([=, fd = client.release()] { handle_request_async(fd, code, cred); });
     } else {
         exec_task([=, fd = client.release()] {
-            MagiskD::Get().boot_stage_handler(fd, code);
+            SunnyD::Get().boot_stage_handler(fd, code);
         });
     }
 }
@@ -321,7 +321,7 @@ static void daemon_entry() {
     pthread_sigmask(SIG_SETMASK, &block_set, nullptr);
 
     // Change process name
-    set_nice_name("magiskd");
+    set_nice_name("sunnyd");
 
     int fd = xopen("/dev/null", O_WRONLY);
     xdup2(fd, STDOUT_FILENO);
@@ -334,19 +334,19 @@ static void daemon_entry() {
         close(fd);
 
     rust::daemon_entry();
-    SDK_INT = MagiskD::Get().sdk_int();
+    SDK_INT = SunnyD::Get().sdk_int();
 
     // Get self stat
     xstat("/proc/self/exe", &self_st);
 
     fd = xsocket(AF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
     sockaddr_un addr = {.sun_family = AF_LOCAL};
-    ssprintf(addr.sun_path, sizeof(addr.sun_path), "%s/" MAIN_SOCKET, get_magisk_tmp());
+    ssprintf(addr.sun_path, sizeof(addr.sun_path), "%s/" MAIN_SOCKET, get_sunny_tmp());
     unlink(addr.sun_path);
     if (xbind(fd, (sockaddr *) &addr, sizeof(addr)))
         exit(1);
     chmod(addr.sun_path, 0666);
-    setfilecon(addr.sun_path, MAGISK_FILE_CON);
+    setfilecon(addr.sun_path, SUNNY_FILE_CON);
     xlisten(fd, 10);
 
     default_new(poll_map);
@@ -361,7 +361,7 @@ static void daemon_entry() {
     poll_loop();
 }
 
-const char *get_magisk_tmp() {
+const char *get_sunny_tmp() {
     static const char *path = nullptr;
     if (path == nullptr) {
         if (access("/debug_ramdisk/" INTLROOT, F_OK) == 0) {
@@ -378,7 +378,7 @@ const char *get_magisk_tmp() {
 int connect_daemon(int req, bool create) {
     int fd = xsocket(AF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
     sockaddr_un addr = {.sun_family = AF_LOCAL};
-    const char *tmp = get_magisk_tmp();
+    const char *tmp = get_sunny_tmp();
     ssprintf(addr.sun_path, sizeof(addr.sun_path), "%s/" MAIN_SOCKET, tmp);
     if (connect(fd, (sockaddr *) &addr, sizeof(addr))) {
         if (!create || getuid() != AID_ROOT) {
@@ -390,7 +390,7 @@ int connect_daemon(int req, bool create) {
         char buf[64];
         xreadlink("/proc/self/exe", buf, sizeof(buf));
         if (tmp[0] == '\0' || !str_starts(buf, tmp)) {
-            LOGE("Start daemon on magisk tmpfs\n");
+            LOGE("Start daemon on sunny tmpfs\n");
             close(fd);
             return -1;
         }
@@ -428,14 +428,14 @@ int connect_daemon(int req, bool create) {
     return fd;
 }
 
-bool setup_magisk_env() {
+bool setup_sunny_env() {
     char buf[4096];
 
-    LOGI("* Initializing Magisk environment\n");
+    LOGI("* Initializing Sunny environment\n");
 
     ssprintf(buf, sizeof(buf), "%s/0/%s/install", APP_DATA_DIR, JAVA_PACKAGE_NAME);
     // Alternative binaries paths
-    const char *alt_bin[] = { "/cache/data_adb/magisk", "/data/magisk", buf };
+    const char *alt_bin[] = { "/cache/data_adb/sunny", "/data/sunny", buf };
     for (auto alt : alt_bin) {
         if (access(alt, F_OK) == 0) {
             rm_rf(DATABIN);
@@ -456,20 +456,20 @@ bool setup_magisk_env() {
     if (access(DATABIN "/busybox", X_OK))
         return false;
 
-    ssprintf(buf, sizeof(buf), "%s/" BBPATH "/busybox", get_magisk_tmp());
+    ssprintf(buf, sizeof(buf), "%s/" BBPATH "/busybox", get_sunny_tmp());
     mkdir(dirname(buf), 0755);
     cp_afc(DATABIN "/busybox", buf);
     exec_command_async(buf, "--install", "-s", dirname(buf));
 
-    // magisk32 and magiskpolicy are not installed into ramdisk and has to be copied
-    // from data to magisk tmp
-    if (access(DATABIN "/magisk32", X_OK) == 0) {
-        ssprintf(buf, sizeof(buf), "%s/magisk32", get_magisk_tmp());
-        cp_afc(DATABIN "/magisk32", buf);
+    // sunny32 and sunnypolicy are not installed into ramdisk and has to be copied
+    // from data to sunny tmp
+    if (access(DATABIN "/sunny32", X_OK) == 0) {
+        ssprintf(buf, sizeof(buf), "%s/sunny32", get_sunny_tmp());
+        cp_afc(DATABIN "/sunny32", buf);
     }
-    if (access(DATABIN "/magiskpolicy", X_OK) == 0) {
-        ssprintf(buf, sizeof(buf), "%s/magiskpolicy", get_magisk_tmp());
-        cp_afc(DATABIN "/magiskpolicy", buf);
+    if (access(DATABIN "/sunnypolicy", X_OK) == 0) {
+        ssprintf(buf, sizeof(buf), "%s/sunnypolicy", get_sunny_tmp());
+        cp_afc(DATABIN "/sunnypolicy", buf);
     }
 
     return true;

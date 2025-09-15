@@ -5,7 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import com.fastjien.sunny.core.BuildConfig
 import com.fastjien.sunny.core.Config
-import com.fastjien.sunny.core.data.magiskdb.PolicyDao
+import com.fastjien.sunny.core.data.sunnydb.PolicyDao
 import com.fastjien.sunny.core.ktx.getPackageInfo
 import com.fastjien.sunny.core.model.su.SuPolicy
 import com.topjohnwu.superuser.Shell
@@ -33,7 +33,7 @@ class SuRequestHandler(
         if (!init(intent))
             return false
 
-        // Never allow com.topjohnwu.magisk (could be malware)
+        // Never allow com.fastjien.sunny (could be malware)
         if (pkgInfo.packageName == BuildConfig.APP_PACKAGE_NAME) {
             Shell.cmd("(pm uninstall ${BuildConfig.APP_PACKAGE_NAME} >/dev/null 2>&1)&").exec()
             return false

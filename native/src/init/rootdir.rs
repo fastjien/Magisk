@@ -1,5 +1,5 @@
 use crate::consts::{ROOTMNT, ROOTOVL};
-use crate::ffi::MagiskInit;
+use crate::ffi::SunnyInit;
 use base::libc::{O_CREAT, O_RDONLY, O_WRONLY};
 use base::{
     BufReadExt, Directory, FsPathBuilder, LoggedResult, ResultExt, Utf8CStr, Utf8CString,
@@ -13,8 +13,8 @@ use std::{
     os::fd::{FromRawFd, RawFd},
 };
 
-pub fn inject_magisk_rc(fd: RawFd, tmp_dir: &Utf8CStr) {
-    debug!("Injecting magisk rc");
+pub fn inject_sunny_rc(fd: RawFd, tmp_dir: &Utf8CStr) {
+    debug!("Injecting sunny rc");
 
     let mut file = unsafe { File::from_raw_fd(fd) };
 
@@ -22,21 +22,21 @@ pub fn inject_magisk_rc(fd: RawFd, tmp_dir: &Utf8CStr) {
         file,
         r#"
 on post-fs-data
-    exec {0} 0 0 -- {1}/magisk --post-fs-data
+    exec {0} 0 0 -- {1}/sunny --post-fs-data
 
 on property:vold.decrypt=trigger_restart_framework
-    exec {0} 0 0 -- {1}/magisk --service
+    exec {0} 0 0 -- {1}/sunny --service
 
 on nonencrypted
-    exec {0} 0 0 -- {1}/magisk --service
+    exec {0} 0 0 -- {1}/sunny --service
 
 on property:sys.boot_completed=1
-    exec {0} 0 0 -- {1}/magisk --boot-complete
+    exec {0} 0 0 -- {1}/sunny --boot-complete
 
 on property:init.svc.zygote=stopped
-    exec {0} 0 0 -- {1}/magisk --zygote-restart
+    exec {0} 0 0 -- {1}/sunny --zygote-restart
 "#,
-        "u:r:magisk:s0", tmp_dir
+        "u:r:sunny:s0", tmp_dir
     )
     .ok();
 
@@ -45,9 +45,9 @@ on property:init.svc.zygote=stopped
 
 pub struct OverlayAttr(Utf8CString, Utf8CString);
 
-impl MagiskInit {
+impl SunnyInit {
     pub(crate) fn parse_config_file(&mut self) {
-        if let Ok(fd) = cstr!("/data/.backup/.magisk").open(O_RDONLY) {
+        if let Ok(fd) = cstr!("/data/.backup/.sunny").open(O_RDONLY) {
             let mut reader = BufReader::new(fd);
             reader.foreach_props(|key, val| {
                 if key == "PREINITDEVICE" {

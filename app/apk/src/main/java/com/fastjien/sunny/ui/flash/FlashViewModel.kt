@@ -17,7 +17,7 @@ import com.fastjien.sunny.core.ktx.synchronized
 import com.fastjien.sunny.core.ktx.timeFormatStandard
 import com.fastjien.sunny.core.ktx.toTime
 import com.fastjien.sunny.core.tasks.FlashZip
-import com.fastjien.sunny.core.tasks.MagiskInstaller
+import com.fastjien.sunny.core.tasks.SunnyInstaller
 import com.fastjien.sunny.core.utils.MediaStoreUtils
 import com.fastjien.sunny.core.utils.MediaStoreUtils.outputStream
 import com.fastjien.sunny.databinding.set
@@ -63,22 +63,22 @@ class FlashViewModel : BaseViewModel() {
                 }
                 Const.Value.UNINSTALL -> {
                     showReboot = false
-                    MagiskInstaller.Uninstall(outItems, logItems).exec()
+                    SunnyInstaller.Uninstall(outItems, logItems).exec()
                 }
-                Const.Value.FLASH_MAGISK -> {
+                Const.Value.FLASH_SUNNY -> {
                     if (Info.isEmulator)
-                        MagiskInstaller.Emulator(outItems, logItems).exec()
+                        SunnyInstaller.Emulator(outItems, logItems).exec()
                     else
-                        MagiskInstaller.Direct(outItems, logItems).exec()
+                        SunnyInstaller.Direct(outItems, logItems).exec()
                 }
                 Const.Value.FLASH_INACTIVE_SLOT -> {
                     showReboot = false
-                    MagiskInstaller.SecondSlot(outItems, logItems).exec()
+                    SunnyInstaller.SecondSlot(outItems, logItems).exec()
                 }
                 Const.Value.PATCH_FILE -> {
                     uri ?: return@launch
                     showReboot = false
-                    MagiskInstaller.Patch(uri, outItems, logItems).exec()
+                    SunnyInstaller.Patch(uri, outItems, logItems).exec()
                 }
                 else -> {
                     back()
@@ -102,7 +102,7 @@ class FlashViewModel : BaseViewModel() {
 
     private fun savePressed() = withExternalRW {
         viewModelScope.launch(Dispatchers.IO) {
-            val name = "magisk_install_log_%s.log".format(
+            val name = "sunny_install_log_%s.log".format(
                 System.currentTimeMillis().toTime(timeFormatStandard)
             )
             val file = MediaStoreUtils.getFile(name)

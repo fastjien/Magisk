@@ -13,7 +13,7 @@ import com.fastjien.sunny.core.AppContext
 import com.fastjien.sunny.core.Config
 import com.fastjien.sunny.core.Info
 import com.fastjien.sunny.core.R
-import com.fastjien.sunny.core.data.magiskdb.PolicyDao
+import com.fastjien.sunny.core.data.sunnydb.PolicyDao
 import com.fastjien.sunny.core.ktx.getLabel
 import com.fastjien.sunny.core.model.su.SuPolicy
 import com.fastjien.sunny.databinding.MergeObservableList

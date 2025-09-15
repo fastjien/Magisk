@@ -28,8 +28,8 @@
     <string name="home_installed_version">Version installée</string>
     <string name="home_latest_version">Dernière version</string>
     <string name="invalid_update_channel">Canal de mise à jour invalide</string>
-    <string name="uninstall_magisk_title">Désinstaller Magisk</string>
-    <string name="uninstall_magisk_msg">Tous les modules seront désactivés ou supprimés !\nL’accès super‑utiliateur sera perdu !\nVos données seront potentiellement chiffrées si elles ne le sont pas déjà.</string>
+    <string name="uninstall_sunny_title">Désinstaller Magisk</string>
+    <string name="uninstall_sunny_msg">Tous les modules seront désactivés ou supprimés !\nL’accès super‑utiliateur sera perdu !\nVos données seront potentiellement chiffrées si elles ne le sont pas déjà.</string>
 
     <!--Install-->
     <string name="keep_force_encryption">Conserver le chiffrement forcé</string>
@@ -81,7 +81,7 @@
 
     <!--Logs-->
     <string name="log_data_none">Aucune information n’est journalisée, essayez d’utiliser davantage vos applications sollicitant des droits de super‑utilisateur.</string>
-    <string name="log_data_magisk_none">Les journaux de Magisk sont vides, c’est étrange.</string>
+    <string name="log_data_sunny_none">Les journaux de Magisk sont vides, c’est étrange.</string>
     <string name="menuSaveLog">Enregistrer le journal</string>
     <string name="menuClearLog">Effacer le journal maintenant</string>
     <string name="logs_cleared">Le journal a été effacé.</string>
@@ -201,7 +201,7 @@
     <string name="updated_channel">Mise à jour Terminée</string>
     <string name="download_complete">Téléchargement terminé</string>
     <string name="download_file_error">Erreur lors du téléchargement du fichier</string>
-    <string name="magisk_update_title">Une mise à jour de Magisk est disponible !</string>
+    <string name="sunny_update_title">Une mise à jour de Magisk est disponible !</string>
     <string name="updated_title">Magisk Mis à jour</string>
     <string name="updated_text">Appuyer pour ouvrir l’application</string>
 
@@ -227,8 +227,8 @@
     <string name="env_fix_title">Installation supplémentaire requise</string>
     <string name="env_fix_msg">Votre appareil a besoin d’une installation supplémentaire afin que Magisk fonctionne correctement. Voulez‑vous effectuer cette installation maintenant puis redémarrer ?</string>
     <string name="setup_msg">Configuration de l’environnement en cours…</string>
-    <string name="unsupport_magisk_title">Version de Magisk non prise en charge</string>
-    <string name="unsupport_magisk_msg">Cette version de Magisk Manager ne prend pas en charge les versions de Magisk inférieures à %1$s.\n\nL’application se comportera comme si Magisk n’était pas installé. Veuillez mettre à jour Magisk aussi vite que possible.</string>
+    <string name="unsupport_sunny_title">Version de Magisk non prise en charge</string>
+    <string name="unsupport_sunny_msg">Cette version de Magisk Manager ne prend pas en charge les versions de Magisk inférieures à %1$s.\n\nL’application se comportera comme si Magisk n’était pas installé. Veuillez mettre à jour Magisk aussi vite que possible.</string>
     <string name="unsupport_general_title">État anormal</string>
     <string name="unsupport_system_app_msg">Cette application ne peut être installée en tant qu’application système. Veuillez la restaurer en tant qu’application utilisateur.</string>
     <string name="unsupport_other_su_msg">Une commande « su » n’appartenant pas à Magisk a été détectée. Merci de supprimer cet autre « su » qui n’est pas pris en charge.</string>

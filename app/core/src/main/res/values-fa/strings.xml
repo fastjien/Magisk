@@ -24,8 +24,8 @@
     <string name="home_installed_version">نصب شده</string>
     <string name="home_latest_version">آخرین نسخه</string>
     <string name="invalid_update_channel">کانال بروزرسانی نامعتبر است</string>
-    <string name="uninstall_magisk_title">حذف Magisk</string>
-    <string name="uninstall_magisk_msg">همه ماژول ها غیرفعال/حذف می شوند!\nروت حذف می شود!\nداده های شما اگر از قبل رمزگذارری نشده بودند رمز نگاری میشوند!</string>
+    <string name="uninstall_sunny_title">حذف Magisk</string>
+    <string name="uninstall_sunny_msg">همه ماژول ها غیرفعال/حذف می شوند!\nروت حذف می شود!\nداده های شما اگر از قبل رمزگذارری نشده بودند رمز نگاری میشوند!</string>
 
     <!--Install-->
     <string name="keep_force_encryption">حفظ رمزگذاری اجباری</string>
@@ -75,7 +75,7 @@
 
     <!--Logs-->
     <string name="log_data_none">شما هیچ لاگی ندارید, سعی کنید برنامه های که به روت دسترسی میگیرند را استفاده کنید.</string>
-    <string name="log_data_magisk_none">لاگ های مربوط به Magisk خالی است. پنا بر خدا.</string>
+    <string name="log_data_sunny_none">لاگ های مربوط به Magisk خالی است. پنا بر خدا.</string>
     <string name="menuSaveLog">ذخیره کردن لاگ</string>
     <string name="menuClearLog">پاک کردن لاگ</string>
     <string name="logs_cleared">لاگ با موفقیت پاک شد.</string>
@@ -162,7 +162,7 @@
     <string name="progress_channel">اعلان پیشرفت</string>
     <string name="download_complete">دانلود کامل شد</string>
     <string name="download_file_error">خطا در دانلود فایل</string>
-    <string name="magisk_update_title">بروزرسانی Magisk در دسترس است!</string>
+    <string name="sunny_update_title">بروزرسانی Magisk در دسترس است!</string>
 
     <!--Toasts, Dialogs-->
     <string name="yes">بله</string>
@@ -182,7 +182,7 @@
     <string name="setup_fail">نصب انجام نشد</string>
     <string name="env_fix_title">به تنظیمات اضافی نیاز دارد</string>
     <string name="setup_msg">راه اندازی محیط نصب…</string>
-    <string name="unsupport_magisk_title">نسخه پشتیبانی نشده Magisk</string>
+    <string name="unsupport_sunny_title">نسخه پشتیبانی نشده Magisk</string>
     <string name="external_rw_permission_denied">برای فعال کردن این قابلیت ، اجازه دسترسی به حافظه بدهید</string>
     <string name="add_shortcut_title">اضافه کردن میانبر را به صفحه</string>
 

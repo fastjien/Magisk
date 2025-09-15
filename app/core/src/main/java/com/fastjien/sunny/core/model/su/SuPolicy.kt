@@ -1,6 +1,6 @@
 package com.fastjien.sunny.core.model.su
 
-import com.fastjien.sunny.core.data.magiskdb.MagiskDB
+import com.fastjien.sunny.core.data.sunnydb.SunnyDB
 
 class SuPolicy(
     val uid: Int,
@@ -20,7 +20,7 @@ class SuPolicy(
         val until = if (remain <= 0) {
             remain
         } else {
-            MagiskDB.Literal("(strftime(\"%s\", \"now\") + $remain)")
+            SunnyDB.Literal("(strftime(\"%s\", \"now\") + $remain)")
         }
         return mutableMapOf(
             "uid" to uid,

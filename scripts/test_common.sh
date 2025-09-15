@@ -50,38 +50,38 @@ wait_for_pm() {
 
 run_setup() {
   local variant=$1
-  adb shell 'PATH=$PATH:/debug_ramdisk magisk -v'
+  adb shell 'PATH=$PATH:/debug_ramdisk sunny -v'
 
-  # Install the Magisk app
+  # Install the Sunny app
   adb install -r -g out/app-${variant}.apk
 
   # Install the test app
   adb install -r -g out/test.apk
 
-  local app='com.topjohnwu.magisk.test/com.topjohnwu.magisk.test.AppTestRunner'
+  local app='com.fastjien.sunny/com.fastjien.sunny.test.AppTestRunner'
 
   # Run setup through the test app
   am_instrument '.Environment#setupEnvironment' $app
 }
 
 run_tests() {
-  local pkg='com.topjohnwu.magisk.test'
+  local pkg='com.fastjien.sunny.test'
   local self="$pkg/$pkg.TestRunner"
   local app="$pkg/$pkg.AppTestRunner"
   local stub="repackaged.$pkg/$pkg.AppTestRunner"
 
   # Run app tests
-  am_instrument '.MagiskAppTest,.AdditionalTest' $app
+  am_instrument '.SunnyAppTest,.AdditionalTest' $app
 
   # Test app hiding
   am_instrument '.AppMigrationTest#testAppHide' $self
 
   # Make sure it still works
-  am_instrument '.MagiskAppTest' $stub
+  am_instrument '.SunnyAppTest' $stub
 
   # Test app restore
   am_instrument '.AppMigrationTest#testAppRestore' $self
 
   # Make sure it still works
-  am_instrument '.MagiskAppTest' $app
+  am_instrument '.SunnyAppTest' $app
 }

@@ -102,7 +102,7 @@ class SplashController<T>(private val activity: T)
 
         if (packageName != APP_PACKAGE_NAME) {
             runCatching {
-                // Hidden, remove com.topjohnwu.magisk if exist as it could be malware
+                // Hidden, remove com.fastjien.sunny if exist as it could be malware
                 packageManager.getApplicationInfo(APP_PACKAGE_NAME, 0)
                 Shell.cmd("(pm uninstall $APP_PACKAGE_NAME)& >/dev/null 2>&1").exec()
             }

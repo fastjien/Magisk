@@ -153,7 +153,7 @@ struct List {
 
 fn print_cpio_usage() {
     eprintln!(
-        r#"Usage: magiskboot cpio <incpio> [commands...]
+        r#"Usage: sunnyboot cpio <incpio> [commands...]
 
 Do cpio commands to <incpio> (modifications are done in-place).
 Each command is a single argument; add quotes for each command.
@@ -177,7 +177,7 @@ Supported commands:
     Extract ENTRY to OUT, or extract all entries to current directory
   test
     Test the cpio's status. Return values:
-    0:stock    1:Magisk    2:unsupported
+    0:stock    1:Sunny    2:unsupported
   patch
     Apply ramdisk patches
     Configure with env variables: KEEPVERITY KEEPFORCEENCRYPT
@@ -503,7 +503,7 @@ impl Cpio {
     }
 }
 
-const MAGISK_PATCHED: i32 = 1 << 0;
+const SUNNY_PATCHED: i32 = 1 << 0;
 const UNSUPPORTED_CPIO: i32 = 1 << 1;
 
 impl Cpio {
@@ -553,12 +553,12 @@ impl Cpio {
             }
         }
         for file in [
-            ".backup/.magisk",
-            "init.magisk.rc",
-            "overlay/init.magisk.rc",
+            ".backup/.sunny",
+            "init.sunny.rc",
+            "overlay/init.sunny.rc",
         ] {
             if self.exists(file) {
-                return MAGISK_PATCHED;
+                return SUNNY_PATCHED;
             }
         }
         0
@@ -574,7 +574,7 @@ impl Cpio {
                     if let Ok(data) = str::from_utf8(&entry.data) {
                         rm_list.push_str(data);
                     }
-                } else if name != ".backup/.magisk" {
+                } else if name != ".backup/.sunny" {
                     let new_name = if name.ends_with(".xz") && entry.decompress() {
                         &name[8..name.len() - 3]
                     } else {
@@ -770,7 +770,7 @@ pub fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool {
         let cmds = map_args(argc, argv)?;
 
         let mut cli =
-            CpioCli::from_args(&["magiskboot", "cpio"], &cmds).on_early_exit(print_cpio_usage);
+            CpioCli::from_args(&["sunnyboot", "cpio"], &cmds).on_early_exit(print_cpio_usage);
 
         let file = Utf8CStr::from_string(&mut cli.file);
         let mut cpio = if file.exists() {
@@ -784,7 +784,7 @@ pub fn cpio_commands(argc: i32, argv: *const *const c_char) -> bool {
                 continue;
             }
             let mut cli = CpioCommand::from_args(
-                &["magiskboot", "cpio", file],
+                &["sunnyboot", "cpio", file],
                 cmd.split(' ')
                     .filter(|x| !x.is_empty())
                     .collect::<Vec<_>>()

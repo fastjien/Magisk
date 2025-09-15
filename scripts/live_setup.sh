@@ -1,28 +1,28 @@
 #####################################################################
-#   AVD Magisk Setup
+#   AVD Sunny Setup
 #####################################################################
 #
 # Support API level: 23 - 35
 #
-# For developing Magisk, just use:
+# For developing Sunny, just use:
 # ./build.py emulator
 #
-# This script will stop zygote, simulate the Magisk start up process
+# This script will stop zygote, simulate the Sunny start up process
 # that would've happened before zygote was started, and finally
 # restart zygote. This is useful for setting up the emulator for
-# developing Magisk, testing modules, and developing root apps using
+# developing Sunny, testing modules, and developing root apps using
 # the official Android emulator (AVD) instead of a real device.
 #
-# This only covers the "core" features of Magisk. For testing
-# magiskinit, please checkout avd_patch.sh.
+# This only covers the "core" features of Sunny. For testing
+# sunnyinit, please checkout avd_patch.sh.
 #
 #####################################################################
 
 mount_tmpfs() {
-  # If a file name 'magisk' is in current directory, mount will fail
-  mv magisk magisk.tmp
-  mount -t tmpfs -o 'mode=0755' magisk $1
-  mv magisk.tmp magisk
+  # If a file name 'sunny' is in current directory, mount will fail
+  mv sunny sunny.tmp
+  mount -t tmpfs -o 'mode=0755' sunny $1
+  mv sunny.tmp sunny
 }
 
 mount_sbin() {
@@ -51,28 +51,28 @@ if [ -z "$FIRST_STAGE" ]; then
   fi
 fi
 
-pm install -r -g $(pwd)/magisk.apk
+pm install -r -g $(pwd)/sunny.apk
 
 # Extract files from APK
-unzip -oj magisk.apk 'assets/util_functions.sh' 'assets/stub.apk'
+unzip -oj sunny.apk 'assets/util_functions.sh' 'assets/stub.apk'
 . ./util_functions.sh
 
 api_level_arch_detect
 
-unzip -oj magisk.apk "lib/$ABI/*" -x "lib/$ABI/libbusybox.so"
+unzip -oj sunny.apk "lib/$ABI/*" -x "lib/$ABI/libbusybox.so"
 for file in lib*.so; do
   chmod 755 $file
   mv "$file" "${file:3:${#file}-6}"
 done
 
 if $IS64BIT && [ -e "/system/bin/linker" ]; then
-  unzip -oj magisk.apk "lib/$ABI32/libmagisk.so"
-  mv libmagisk.so magisk32
-  chmod 755 magisk32
+  unzip -oj sunny.apk "lib/$ABI32/libsunny.so"
+  mv libsunny.so sunny32
+  chmod 755 sunny32
 fi
 
 # Stop zygote (and previous setup if exists)
-magisk --stop 2>/dev/null
+sunny --stop 2>/dev/null
 stop
 if [ -d /debug_ramdisk ]; then
   umount -l /debug_ramdisk 2>/dev/null
@@ -86,7 +86,7 @@ if ! grep -q ' /cache ' /proc/mounts; then
   mount -t tmpfs -o 'mode=0755' tmpfs /cache
 fi
 
-MAGISKTMP=/sbin
+SUNNYTMP=/sbin
 
 # Setup bin overlay
 if mount | grep -q rootfs; then
@@ -120,58 +120,58 @@ elif [ -e /sbin ]; then
   rm -rf /dev/sysroot
 else
   # Android Q+ without sbin
-  MAGISKTMP=/debug_ramdisk
+  SUNNYTMP=/debug_ramdisk
   mount_tmpfs /debug_ramdisk
 fi
 
-# Magisk stuff
-mkdir -p $MAGISKBIN 2>/dev/null
-unzip -oj magisk.apk 'assets/*.sh' -d $MAGISKBIN
+# Sunny stuff
+mkdir -p $SUNNYBIN 2>/dev/null
+unzip -oj sunny.apk 'assets/*.sh' -d $SUNNYBIN
 mkdir /data/adb/modules 2>/dev/null
 mkdir /data/adb/post-fs-data.d 2>/dev/null
 mkdir /data/adb/service.d 2>/dev/null
 
-for file in magisk magisk32 magiskpolicy stub.apk; do
+for file in sunny sunny32 sunnypolicy stub.apk; do
   chmod 755 ./$file
-  cp -af ./$file $MAGISKTMP/$file
-  cp -af ./$file $MAGISKBIN/$file
+  cp -af ./$file $SUNNYTMP/$file
+  cp -af ./$file $SUNNYBIN/$file
 done
-cp -af ./magiskboot $MAGISKBIN/magiskboot
-cp -af ./magiskinit $MAGISKBIN/magiskinit
-cp -af ./busybox $MAGISKBIN/busybox
+cp -af ./sunnyboot $SUNNYBIN/sunnyboot
+cp -af ./sunnyinit $SUNNYBIN/sunnyinit
+cp -af ./busybox $SUNNYBIN/busybox
 
-ln -s ./magisk $MAGISKTMP/op
-ln -s ./magisk $MAGISKTMP/resetprop
-ln -s ./magiskpolicy $MAGISKTMP/supolicy
+ln -s ./sunny $SUNNYTMP/op
+ln -s ./sunny $SUNNYTMP/resetprop
+ln -s ./sunnypolicy $SUNNYTMP/supolicy
 
-mkdir -p $MAGISKTMP/.magisk/device
-mkdir -p $MAGISKTMP/.magisk/worker
-mount_tmpfs $MAGISKTMP/.magisk/worker
-mount --make-private $MAGISKTMP/.magisk/worker
-touch $MAGISKTMP/.magisk/config
+mkdir -p $SUNNYTMP/.sunny/device
+mkdir -p $SUNNYTMP/.sunny/worker
+mount_tmpfs $SUNNYTMP/.sunny/worker
+mount --make-private $SUNNYTMP/.sunny/worker
+touch $SUNNYTMP/.sunny/config
 
-export MAGISKTMP
-MAKEDEV=1 $MAGISKTMP/magisk --preinit-device 2>&1
+export SUNNYTMP
+MAKEDEV=1 $SUNNYTMP/sunny --preinit-device 2>&1
 
 RULESCMD=""
-rule="$MAGISKTMP/.magisk/preinit/sepolicy.rule"
+rule="$SUNNYTMP/.sunny/preinit/sepolicy.rule"
 [ -f "$rule" ] && RULESCMD="--apply $rule"
 
 # SELinux stuffs
 if [ -d /sys/fs/selinux ]; then
   if [ -f /vendor/etc/selinux/precompiled_sepolicy ]; then
-    ./magiskpolicy --load /vendor/etc/selinux/precompiled_sepolicy --live --magisk $RULESCMD 2>&1
+    ./sunnypolicy --load /vendor/etc/selinux/precompiled_sepolicy --live --sunny $RULESCMD 2>&1
   elif [ -f /sepolicy ]; then
-    ./magiskpolicy --load /sepolicy --live --magisk $RULESCMD 2>&1
+    ./sunnypolicy --load /sepolicy --live --sunny $RULESCMD 2>&1
   else
-    ./magiskpolicy --live --magisk $RULESCMD 2>&1
+    ./sunnypolicy --live --sunny $RULESCMD 2>&1
   fi
 fi
 
 # Boot up
-$MAGISKTMP/magisk --post-fs-data
+$SUNNYTMP/sunny --post-fs-data
 start
-$MAGISKTMP/magisk --service
+$SUNNYTMP/sunny --service
 # Make sure reset nb prop after zygote starts
 sleep 2
-$MAGISKTMP/magisk --boot-complete
+$SUNNYTMP/sunny --boot-complete

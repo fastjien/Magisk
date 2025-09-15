@@ -7,9 +7,9 @@ import androidx.room.Room
 import com.fastjien.sunny.core.AppContext
 import com.fastjien.sunny.core.Const
 import com.fastjien.sunny.core.data.SuLogDatabase
-import com.fastjien.sunny.core.data.magiskdb.PolicyDao
-import com.fastjien.sunny.core.data.magiskdb.SettingsDao
-import com.fastjien.sunny.core.data.magiskdb.StringDao
+import com.fastjien.sunny.core.data.sunnydb.PolicyDao
+import com.fastjien.sunny.core.data.sunnydb.SettingsDao
+import com.fastjien.sunny.core.data.sunnydb.StringDao
 import com.fastjien.sunny.core.ktx.deviceProtectedContext
 import com.fastjien.sunny.core.repository.LogRepository
 import com.fastjien.sunny.core.repository.NetworkService

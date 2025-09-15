@@ -1,4 +1,4 @@
-use crate::ffi::MagiskInit;
+use crate::ffi::SunnyInit;
 use base::libc::{TMPFS_MAGIC, statfs};
 use base::{
     Directory, FsPathBuilder, LibcReturn, LoggedResult, ResultExt, Utf8CStr, cstr, debug, libc,
@@ -76,13 +76,13 @@ pub(crate) fn is_rootfs() -> bool {
     }
 }
 
-impl MagiskInit {
+impl SunnyInit {
     pub(crate) fn prepare_data(&self) {
         debug!("Setup data tmp");
         cstr!("/data").mkdir(0o755).log_ok();
         unsafe {
             mount(
-                raw_cstr!("magisk"),
+                raw_cstr!("sunny"),
                 raw_cstr!("/data"),
                 raw_cstr!("tmpfs"),
                 0,
@@ -92,7 +92,7 @@ impl MagiskInit {
         .check_io_err()
         .log_ok();
 
-        cstr!("/init").copy_to(cstr!("/data/magiskinit")).log_ok();
+        cstr!("/init").copy_to(cstr!("/data/sunnyinit")).log_ok();
         cstr!("/.backup").copy_to(cstr!("/data/.backup")).log_ok();
         cstr!("/overlay.d")
             .copy_to(cstr!("/data/overlay.d"))

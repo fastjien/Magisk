@@ -5,7 +5,7 @@ import com.fastjien.sunny.core.Info
 import com.fastjien.sunny.core.R
 import com.fastjien.sunny.core.download.DownloadEngine
 import com.fastjien.sunny.core.download.Subject
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import java.io.File
 
 class ManagerInstallDialog : MarkDownDialog() {
@@ -17,15 +17,15 @@ class ManagerInstallDialog : MarkDownDialog() {
         return text
     }
 
-    override fun build(dialog: MagiskDialog) {
+    override fun build(dialog: SunnyDialog) {
         super.build(dialog)
         dialog.apply {
             setCancelable(true)
-            setButton(MagiskDialog.ButtonType.POSITIVE) {
+            setButton(SunnyDialog.ButtonType.POSITIVE) {
                 text = R.string.install
                 onClick { DownloadEngine.startWithActivity(activity, Subject.App()) }
             }
-            setButton(MagiskDialog.ButtonType.NEGATIVE) {
+            setButton(SunnyDialog.ButtonType.NEGATIVE) {
                 text = android.R.string.cancel
             }
         }

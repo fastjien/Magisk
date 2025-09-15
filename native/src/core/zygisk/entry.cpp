@@ -58,12 +58,12 @@ static void zygiskd(int socket) {
     for (;;) {
         poll(&pfd, 1, -1);
         if (pfd.revents && !(pfd.revents & POLLIN)) {
-            // Something bad happened in magiskd, terminate zygiskd
+            // Something bad happened in sunnyd, terminate zygiskd
             exit(0);
         }
         int client = recv_fd(socket);
         if (client < 0) {
-            // Something bad happened in magiskd, terminate zygiskd
+            // Something bad happened in sunnyd, terminate zygiskd
             exit(0);
         }
         int module_id = read_int(client);

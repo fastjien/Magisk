@@ -29,8 +29,8 @@
     <string name="home_installed_version">Инсталирано</string>
     <string name="home_latest_version">Најновије</string>
     <string name="invalid_update_channel">Невалидан канал ажурирања</string>
-    <string name="uninstall_magisk_title">Деинсталирај Magisk</string>
-    <string name="uninstall_magisk_msg">Сви модули ће бити онемогућени/уклоњени!\nКорен ће бити уклоњен!\nСвако неенкриптовано интерно складиште ће употребом Magisk-а бити поново енкриптовано!</string>
+    <string name="uninstall_sunny_title">Деинсталирај Magisk</string>
+    <string name="uninstall_sunny_msg">Сви модули ће бити онемогућени/уклоњени!\nКорен ће бити уклоњен!\nСвако неенкриптовано интерно складиште ће употребом Magisk-а бити поново енкриптовано!</string>
 
     <!--Install-->
     <string name="keep_force_encryption">Задржи форсирану енкрипцију</string>
@@ -82,7 +82,7 @@
 
     <!--Logs-->
     <string name="log_data_none">Немате логова, покушајте користити коренске апликације више</string>
-    <string name="log_data_magisk_none">Magisk логови су празни, то је чудно</string>
+    <string name="log_data_sunny_none">Magisk логови су празни, то је чудно</string>
     <string name="menuSaveLog">Сачувај лог</string>
     <string name="menuClearLog">Уклони лог</string>
     <string name="logs_cleared">Лог успешно уклоњен</string>
@@ -203,7 +203,7 @@
     <string name="updated_channel">Ажурирање завршено</string>
     <string name="download_complete">Преузимање завршено</string>
     <string name="download_file_error">Грешка при преузимању фајла</string>
-    <string name="magisk_update_title">Ажурирање Magisk-а доступно!</string>
+    <string name="sunny_update_title">Ажурирање Magisk-а доступно!</string>
     <string name="updated_title">Magisk је ажуриран</string>
     <string name="updated_text">Кликни да отвориш апликацију</string>
 
@@ -232,8 +232,8 @@
     <string name="env_fix_msg">Ваш уређај захтева додатно подешавање да би Magisk радио како треба. Да ли желите наставити и покренути поново?</string>
     <string name="env_full_fix_msg">Ваш уређај захтева поновно флешовање да би Magisk радио како треба. Реинсталирајте Magisk кроз апликацију, режим опоравка не може добити тачне информације о уређају.</string>
     <string name="setup_msg">Покретање подешавања окружења…</string>
-    <string name="unsupport_magisk_title">Неподржана верзија Magisk-а</string>
-    <string name="unsupport_magisk_msg">Ова верзија апликације не подржава Magisk верзије мање од %1$s.\n\nАпликација ће се понашати као да Magisk није инсталиран, молимо ажурирајте Magisk што пре.</string>
+    <string name="unsupport_sunny_title">Неподржана верзија Magisk-а</string>
+    <string name="unsupport_sunny_msg">Ова верзија апликације не подржава Magisk верзије мање од %1$s.\n\nАпликација ће се понашати као да Magisk није инсталиран, молимо ажурирајте Magisk што пре.</string>
     <string name="unsupport_general_title">Ненормално стање</string>
     <string name="unsupport_system_app_msg">Покретање апликације као системске није подржано. Молимо поставите апликацију да буде корисничка.</string>
     <string name="unsupport_other_su_msg">Детектован \"su\" binary који није Magisk-ов. Молимо уклоните конкурентно коренско решење и/или реинсталирајте Magisk.</string>

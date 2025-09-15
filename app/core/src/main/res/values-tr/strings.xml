@@ -27,8 +27,8 @@
     <string name="home_installed_version">Yüklü</string>
     <string name="home_latest_version">En Son</string>
     <string name="invalid_update_channel">Geçersiz güncelleme kanalı</string>
-    <string name="uninstall_magisk_title">Magisk\'i Kaldır</string>
-    <string name="uninstall_magisk_msg">Tüm modüller devre dışı bırakılacak/kaldırılacak!\nRoot kaldırılacak!\nMagisk kullanılarak şifresi çözülen dahili depolama birimleri yeniden şifrelenecek!</string>
+    <string name="uninstall_sunny_title">Magisk\'i Kaldır</string>
+    <string name="uninstall_sunny_msg">Tüm modüller devre dışı bırakılacak/kaldırılacak!\nRoot kaldırılacak!\nMagisk kullanılarak şifresi çözülen dahili depolama birimleri yeniden şifrelenecek!</string>
 
     <!--Install-->
     <string name="keep_force_encryption">Zorunlu Şifrelemeyi Koru</string>
@@ -80,7 +80,7 @@
 
     <!--Logs-->
     <string name="log_data_none">Günlüğünüz temiz. Root uygulamalarınızı daha fazla kullanmayı deneyin.</string>
-    <string name="log_data_magisk_none">Magisk günlükleri boş, bu garip.</string>
+    <string name="log_data_sunny_none">Magisk günlükleri boş, bu garip.</string>
     <string name="menuSaveLog">Günlüğü Kaydet</string>
     <string name="menuClearLog">Günlüğü Şimdi Temizle</string>
     <string name="logs_cleared">Günlük başarıyla temizlendi</string>
@@ -200,7 +200,7 @@
     <string name="updated_channel">Güncelleme tamamlandı</string>
     <string name="download_complete">İndirme tamamlandı</string>
     <string name="download_file_error">Dosya indirilirken hata oluştu</string>
-    <string name="magisk_update_title">Magisk güncellemesi mevcut!</string>
+    <string name="sunny_update_title">Magisk güncellemesi mevcut!</string>
     <string name="updated_title">Magisk güncellendi</string>
     <string name="updated_text">Uygulamayı açmak için dokunun</string>
 
@@ -229,8 +229,8 @@
     <string name="env_fix_msg">Cihazınızın Magisk\'in düzgün çalışması için ek kuruluma ihtiyacı var. Devam edip yeniden başlatmak ister misiniz?</string>
     <string name="env_full_fix_msg">Cihazınızın düzgün çalışması için Magisk\'i yeniden flaşlamanız gerekiyor. Lütfen Magisk\'i uygulama içinden yeniden kurun, Kurtarma modu doğru cihaz bilgisini alamaz.</string>
     <string name="setup_msg">Çalışma ortamı kuruluyor…</string>
-    <string name="unsupport_magisk_title">Desteklenmeyen Magisk Sürümü</string>
-    <string name="unsupport_magisk_msg">Uygulamanın bu sürümü, %1$s sürümünden daha düşük Magisk sürümlerini desteklemiyor.\n\nUygulama, Magisk yüklü değilmiş gibi davranacaktır. Lütfen Magisk\'i en kısa sürede güncelleyin.</string>
+    <string name="unsupport_sunny_title">Desteklenmeyen Magisk Sürümü</string>
+    <string name="unsupport_sunny_msg">Uygulamanın bu sürümü, %1$s sürümünden daha düşük Magisk sürümlerini desteklemiyor.\n\nUygulama, Magisk yüklü değilmiş gibi davranacaktır. Lütfen Magisk\'i en kısa sürede güncelleyin.</string>
     <string name="unsupport_general_title">Anormal Durum</string>
     <string name="unsupport_system_app_msg">Bu uygulamanın bir sistem uygulaması olarak çalıştırılması desteklenmiyor. Lütfen uygulamayı bir kullanıcı uygulamasına geri döndürün.</string>
     <string name="unsupport_other_su_msg">Magisk\'e ait olmayan bir "su" ikili dosyası tespit edildi. Lütfen rakip root çözümlerini kaldırın ve/veya Magisk\'i yeniden yükleyin.</string>

@@ -95,13 +95,13 @@ static bool patch_rc_scripts(const char *src_path, const char *tmp_path, bool wr
         // Inject custom rc scripts
         for (auto &script : rc_list) {
             // Replace template arguments of rc scripts with dynamic paths
-            replace_all(script, "${MAGISKTMP}", tmp_path);
+            replace_all(script, "${SUNNYTMP}", tmp_path);
             fprintf(dest.get(), "\n%s\n", script.data());
         }
         rc_list.clear();
 
-        // Inject Magisk rc scripts
-        rust::inject_magisk_rc(fileno(dest.get()), tmp_path);
+        // Inject Sunny rc scripts
+        rust::inject_sunny_rc(fileno(dest.get()), tmp_path);
 
         fclone_attr(fileno(src.get()), fileno(dest.get()));
     }
@@ -122,7 +122,7 @@ static bool patch_rc_scripts(const char *src_path, const char *tmp_path, bool wr
                 LOGD("Inject zygote restart\n");
                 fprintf(dest.get(), "%s", line.data());
                 fprintf(dest.get(),
-                        "    onrestart exec " MAGISK_PROC_CON " 0 0 -- %s/magisk --zygote-restart\n", tmp_path);
+                        "    onrestart exec " SUNNY_PROC_CON " 0 0 -- %s/sunny --zygote-restart\n", tmp_path);
                 return true;
             }
             fprintf(dest.get(), "%s", line.data());
@@ -134,7 +134,7 @@ static bool patch_rc_scripts(const char *src_path, const char *tmp_path, bool wr
     return faccessat(src_fd, "init.fission_host.rc", F_OK, 0) == 0;
 }
 
-void MagiskInit::patch_fissiond(const char *tmp_path) noexcept {
+void SunnyInit::patch_fissiond(const char *tmp_path) noexcept {
     {
         LOGD("Patching fissiond\n");
         mmap_data fissiond("/system/bin/fissiond", false);
@@ -231,15 +231,15 @@ static void recreate_sbin(const char *mirror, bool use_bind_mount) {
 }
 
 static void extract_files(bool sbin) {
-    const char *magisk_xz = sbin ? "/sbin/magisk.xz" : "magisk.xz";
+    const char *sunny_xz = sbin ? "/sbin/sunny.xz" : "sunny.xz";
     const char *stub_xz = sbin ? "/sbin/stub.xz" : "stub.xz";
     const char *init_ld_xz = sbin ? "/sbin/init-ld.xz" : "init-ld.xz";
 
-    if (access(magisk_xz, F_OK) == 0) {
-        mmap_data magisk(magisk_xz);
-        unlink(magisk_xz);
-        int fd = xopen("magisk", O_WRONLY | O_CREAT, 0755);
-        unxz(fd, magisk);
+    if (access(sunny_xz, F_OK) == 0) {
+        mmap_data sunny(sunny_xz);
+        unlink(sunny_xz);
+        int fd = xopen("sunny", O_WRONLY | O_CREAT, 0755);
+        unxz(fd, sunny);
         close(fd);
     }
     if (access(stub_xz, F_OK) == 0) {
@@ -258,7 +258,7 @@ static void extract_files(bool sbin) {
     }
 }
 
-void MagiskInit::patch_ro_root() noexcept {
+void SunnyInit::patch_ro_root() noexcept {
     mount_list.emplace_back("/data");
     parse_config_file();
 
@@ -333,10 +333,10 @@ void MagiskInit::patch_ro_root() noexcept {
     chdir("/");
 }
 
-#define PRE_TMPSRC "/magisk"
+#define PRE_TMPSRC "/sunny"
 #define PRE_TMPDIR PRE_TMPSRC "/tmp"
 
-void MagiskInit::patch_rw_root() noexcept {
+void SunnyInit::patch_rw_root() noexcept {
     mount_list.emplace_back("/data");
     parse_config_file();
 
@@ -369,18 +369,18 @@ void MagiskInit::patch_rw_root() noexcept {
 
     chdir("/");
 
-    // Dump magiskinit as magisk
-    cp_afc(REDIR_PATH, "/sbin/magisk");
+    // Dump sunnyinit as sunny
+    cp_afc(REDIR_PATH, "/sbin/sunny");
 }
 
-int magisk_proxy_main(int, char *argv[]) {
+int sunny_proxy_main(int, char *argv[]) {
     rust::setup_klog();
     LOGD("%s\n", __FUNCTION__);
 
     // Mount rootfs as rw to do post-init rootfs patches
     xmount(nullptr, "/", nullptr, MS_REMOUNT, nullptr);
 
-    unlink("/sbin/magisk");
+    unlink("/sbin/sunny");
 
     // Move tmpfs to /sbin
     // make parent private before MS_MOVE
@@ -393,9 +393,9 @@ int magisk_proxy_main(int, char *argv[]) {
     // Create symlinks pointing back to /root
     recreate_sbin("/root", false);
 
-    // Tell magiskd to remount rootfs
+    // Tell sunnyd to remount rootfs
     setenv("REMOUNT_ROOT", "1", 1);
-    execve("/sbin/magisk", argv, environ);
+    execve("/sbin/sunny", argv, environ);
     return 1;
 }
 

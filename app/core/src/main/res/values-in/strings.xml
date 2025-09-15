@@ -28,8 +28,8 @@
     <string name="home_installed_version">Terpasang</string>
     <string name="home_latest_version">Terbaru</string>
     <string name="invalid_update_channel">Saluran pembaruan tidak valid</string>
-    <string name="uninstall_magisk_title">Copot Magisk</string>
-    <string name="uninstall_magisk_msg">Semua modul akan dinonaktifkan/dihapus!\nRoot akan dihapus!\nData Anda berpotensi terenkripsi jika belum!</string>
+    <string name="uninstall_sunny_title">Copot Magisk</string>
+    <string name="uninstall_sunny_msg">Semua modul akan dinonaktifkan/dihapus!\nRoot akan dihapus!\nData Anda berpotensi terenkripsi jika belum!</string>
 
     <!--Install-->
     <string name="keep_force_encryption">Pertahankan enkripsi paksa</string>
@@ -81,7 +81,7 @@
 
     <!--Logs-->
     <string name="log_data_none">Log Anda masih kosong, coba gunakan lebih banyak aplikasi yang membutuhkan SU Anda</string>
-    <string name="log_data_magisk_none">Log Magisk kosong, ini aneh</string>
+    <string name="log_data_sunny_none">Log Magisk kosong, ini aneh</string>
     <string name="menuSaveLog">Simpan log</string>
     <string name="menuClearLog">Hapus log sekarang</string>
     <string name="logs_cleared">Log berhasil dihapus</string>
@@ -192,7 +192,7 @@
     <string name="updated_channel">Pembaruan Selesai</string>
     <string name="download_complete">Unduhan selesai</string>
     <string name="download_file_error">Kesalahan saat mengunduh file</string>
-    <string name="magisk_update_title">Pembaruan Magisk tersedia!</string>
+    <string name="sunny_update_title">Pembaruan Magisk tersedia!</string>
     <string name="updated_title">Magisk Diperbarui</string>
     <string name="updated_text">Ketuk untuk buka aplikasi</string>
 
@@ -218,8 +218,8 @@
     <string name="env_fix_msg">Perangkat Anda membutuhkan pengaturan tambahan untuk Magisk agar berfungsi dengan benar. Apakah Anda ingin melanjutkan dan Menyalakan ulang?</string>
     <string name="env_full_fix_msg">Perangkat Anda membutuhkan pemasangan ulang Magisk agar berfungsi dengan baik. Silakan pasang ulang Magisk dalam aplikasi, mode recovery tidak dapat memperoleh info perangkat yang benar.</string>
     <string name="setup_msg">Memproses penyiapan lingkungan…</string>
-    <string name="unsupport_magisk_title">Versi Magisk tidak didukung</string>
-    <string name="unsupport_magisk_msg">Versi aplikasi ini tidak mendukung versi Magisk yang lebih rendah dari %1$s.\n\nAplikasi akan berperilaku seolah-olah tidak ada Magisk yang dipasang, harap tingkatkan Magisk sesegera mungkin.</string>
+    <string name="unsupport_sunny_title">Versi Magisk tidak didukung</string>
+    <string name="unsupport_sunny_msg">Versi aplikasi ini tidak mendukung versi Magisk yang lebih rendah dari %1$s.\n\nAplikasi akan berperilaku seolah-olah tidak ada Magisk yang dipasang, harap tingkatkan Magisk sesegera mungkin.</string>
     <string name="unsupport_general_title">Keadaan tidak normal</string>
     <string name="unsupport_system_app_msg">Menjalankan aplikasi ini sebagai aplikasi sistem tidak didukung. Harap kembalikan aplikasi ke aplikasi pengguna.</string>
     <string name="unsupport_other_su_msg">Sebuah \"su\" biner bukan dari Magisk telah terdeteksi. Hapus semua solusi root yang bersaing dan/atau pasang ulang Magisk.</string>

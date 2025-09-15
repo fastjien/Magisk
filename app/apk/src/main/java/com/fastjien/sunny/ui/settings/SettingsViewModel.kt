@@ -60,7 +60,7 @@ class SettingsViewModel : BaseViewModel(), BaseSettingsItem.Handler {
         // Magisk
         if (Info.env.isActive) {
             list.addAll(listOf(
-                Magisk,
+                Sunny,
                 SystemlessHosts
             ))
             if (Const.Version.atLeast_24_0()) {

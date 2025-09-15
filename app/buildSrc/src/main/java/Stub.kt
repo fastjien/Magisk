@@ -240,7 +240,7 @@ private fun genStubClasses(factoryOutDir: File, appOutDir: File) {
 }
 
 private fun genEncryptedResources(res: ByteArray, outDir: File) {
-    val mainPkgDir = File(outDir, "com/topjohnwu/magisk")
+    val mainPkgDir = File(outDir, "com/fastjien/sunny")
     mainPkgDir.mkdirs()
 
     // Generate iv and key

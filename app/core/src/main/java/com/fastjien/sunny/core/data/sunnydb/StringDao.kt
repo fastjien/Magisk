@@ -1,6 +1,6 @@
-package com.fastjien.sunny.core.data.magiskdb
+package com.fastjien.sunny.core.data.sunnydb
 
-class StringDao : MagiskDB() {
+class StringDao : SunnyDB() {
 
     suspend fun delete(key: String) {
         val query = "DELETE FROM ${Table.STRINGS} WHERE key=\"$key\""

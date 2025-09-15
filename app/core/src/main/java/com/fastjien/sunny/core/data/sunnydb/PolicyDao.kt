@@ -1,4 +1,4 @@
-package com.fastjien.sunny.core.data.magiskdb
+package com.fastjien.sunny.core.data.sunnydb
 
 import com.fastjien.sunny.core.AppContext
 import com.fastjien.sunny.core.Const
@@ -6,7 +6,7 @@ import com.fastjien.sunny.core.model.su.SuPolicy
 
 private const val SELECT_QUERY = "SELECT (until - strftime(\"%s\", \"now\")) AS remain, *"
 
-class PolicyDao : MagiskDB() {
+class PolicyDao : SunnyDB() {
 
     suspend fun deleteOutdated() {
         val query = "DELETE FROM ${Table.POLICY} WHERE " +

@@ -112,22 +112,22 @@ class FlashFragment : BaseFragment<FragmentFlashMd2Binding>(), MenuProvider {
                 .createPendingIntent()
 
         private fun flashType(isSecondSlot: Boolean) =
-            if (isSecondSlot) Const.Value.FLASH_INACTIVE_SLOT else Const.Value.FLASH_MAGISK
+            if (isSecondSlot) Const.Value.FLASH_INACTIVE_SLOT else Const.Value.FLASH_SUNNY
 
-        /* Flashing is understood as installing / flashing magisk itself */
+        /* Flashing is understood as installing / flashing sunny itself */
 
         fun flash(isSecondSlot: Boolean) = MainDirections.actionFlashFragment(
             action = flashType(isSecondSlot)
         )
 
-        /* Patching is understood as injecting img files with magisk */
+        /* Patching is understood as injecting img files with sunny */
 
         fun patch(uri: Uri) = MainDirections.actionFlashFragment(
             action = Const.Value.PATCH_FILE,
             additionalData = uri
         )
 
-        /* Uninstalling is understood as removing magisk entirely */
+        /* Uninstalling is understood as removing sunny entirely */
 
         fun uninstall() = MainDirections.actionFlashFragment(
             action = Const.Value.UNINSTALL

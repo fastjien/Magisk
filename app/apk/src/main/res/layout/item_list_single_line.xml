@@ -6,11 +6,11 @@
 
         <variable
             name="item"
-            type="com.fastjien.sunny.view.MagiskDialog.DialogItem" />
+            type="com.fastjien.sunny.view.SunnyDialog.DialogItem" />
 
         <variable
             name="listener"
-            type="com.fastjien.sunny.view.MagiskDialog.DialogClickListener" />
+            type="com.fastjien.sunny.view.SunnyDialog.DialogClickListener" />
 
     </data>
 

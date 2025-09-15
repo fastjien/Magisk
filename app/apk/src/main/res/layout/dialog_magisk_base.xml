@@ -7,7 +7,7 @@
 
         <variable
             name="data"
-            type="com.fastjien.sunny.view.MagiskDialog.Data" />
+            type="com.fastjien.sunny.view.SunnyDialog.Data" />
 
     </data>
 

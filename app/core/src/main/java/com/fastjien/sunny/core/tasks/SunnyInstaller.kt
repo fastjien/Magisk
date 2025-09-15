@@ -49,7 +49,7 @@ import java.security.SecureRandom
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class MagiskInstallImpl protected constructor(
+abstract class SunnyInstallImpl protected constructor(
     protected val console: MutableList<String>,
     private val logs: MutableList<String>
 ) {
@@ -69,22 +69,22 @@ abstract class MagiskInstallImpl protected constructor(
             val alpha = "abcdefghijklmnopqrstuvwxyz"
             val alphaNum = "$alpha${alpha.uppercase(Locale.ROOT)}0123456789"
             val random = SecureRandom()
-            StringBuilder("magisk_patched-${BuildConfig.APP_VERSION_CODE}_").run {
+            StringBuilder("sunny_patched-${BuildConfig.APP_VERSION_CODE}_").run {
                 for (i in 1..5) {
                     append(alphaNum[random.nextInt(alphaNum.length)])
                 }
                 toString()
             }
         } else {
-            "magisk_patched"
+            "sunny_patched"
         }
     }
 
     private fun findImage(slot: String): Boolean {
         val bootPath = (
-            "(RECOVERYMODE=${Config.recovery} " +
-            "SLOT=$slot find_boot_image; " +
-            "echo \$BOOTIMAGE)").fsh()
+                "(RECOVERYMODE=${Config.recovery} " +
+                        "SLOT=$slot find_boot_image; " +
+                        "echo \$BOOTIMAGE)").fsh()
         if (bootPath.isEmpty()) {
             console.add("! Unable to detect target image")
             return false
@@ -115,6 +115,7 @@ abstract class MagiskInstallImpl protected constructor(
         try {
             // Extract binaries
             if (isRunningAsStub) {
+                // 根据是否为Stub模式，一般情况下不会走这个分支；
                 ZipFile.builder().setFile(StubApk.current(context)).get().use { zf ->
                     zf.entries.asSequence().filter {
                         !it.isDirectory && it.name.startsWith("lib/${Const.CPU_ABI}/")
@@ -128,37 +129,40 @@ abstract class MagiskInstallImpl protected constructor(
 
                     val abi32 = Const.CPU_ABI_32
                     if (Process.is64Bit() && abi32 != null) {
-                        val entry = zf.getEntry("lib/$abi32/libmagisk.so")
+                        val entry = zf.getEntry("lib/$abi32/libsunny.so")
                         if (entry != null) {
-                            val magisk32 = File(installDir, "magisk32")
-                            zf.getInputStream(entry).writeTo(magisk32)
+                            val sunny32 = File(installDir, "sunny32")
+                            zf.getInputStream(entry).writeTo(sunny32)
                         }
                     }
                 }
             } else {
                 val info = context.applicationInfo
+                // libs是File集合，把libsunny.so、libsunnyinit.so、libsunnypolicy.so……等文件找出来
                 val libs = File(info.nativeLibraryDir).listFiles { _, name ->
                     name.startsWith("lib") && name.endsWith(".so")
                 } ?: emptyArray()
 
                 for (lib in libs) {
                     val name = lib.name.substring(3, lib.name.length - 3)
+                    // 把找到的so文件链接到指定位置 /data/user_de/0/com.fastjien.sunny/install
                     Os.symlink(lib.path, "$installDir/$name")
                 }
 
-                // Also extract magisk32 on 64-bit devices that supports 32-bit
+                // Also extract sunny32 on 64-bit devices that supports 32-bit
                 val abi32 = Const.CPU_ABI_32
                 if (Process.is64Bit() && abi32 != null) {
-                    val name = "lib/$abi32/libmagisk.so"
+                    val name = "lib/$abi32/libsunny.so"
                     val entry = javaClass.classLoader!!.getResourceAsStream(name)
                     if (entry != null) {
-                        val magisk32 = File(installDir, "magisk32")
-                        entry.writeTo(magisk32)
+                        val sunny32 = File(installDir, "sunny32")
+                        entry.writeTo(sunny32)
                     }
                 }
             }
 
             // Extract scripts
+            // 把 assets 中的脚本等文件copy到指定位置
             for (script in listOf("util_functions.sh", "boot_patch.sh", "addon.d.sh", "stub.apk")) {
                 val dest = File(installDir, script)
                 context.assets.open(script).writeTo(dest)
@@ -303,20 +307,23 @@ abstract class MagiskInstallImpl protected constructor(
                     arrayOf(
                         "cd $installDir",
                         "chmod -R 755 .",
-                        "./magiskboot unpack boot.img",
-                        "./magiskboot repack boot.img",
+                        "./sunnyboot unpack boot.img",
+                        "./sunnyboot repack boot.img",
                         "cat new-boot.img > boot.img",
-                        "./magiskboot cleanup",
+                        "./sunnyboot cleanup",
                         "rm -f new-boot.img",
-                        "cd /").sh()
+                        "cd /"
+                    ).sh()
                     boot.copyTo(tarOut)
                 }
                 recovery
             }
+
             initBoot != null -> {
                 boot?.copyTo(tarOut)
                 initBoot
             }
+
             boot != null -> boot
             else -> throw NoBootException()
         }
@@ -339,11 +346,13 @@ abstract class MagiskInstallImpl protected constructor(
                         // No boot image in payload.bin, continue to find boot images
                     }
                 }
+
                 "init_boot.img" -> {
                     console.add("- Extracting init_boot.img")
                     zipIn.copyAndCloseOut(initBoot.newOutputStream())
                     return initBoot
                 }
+
                 "boot.img" -> {
                     console.add("- Extracting boot.img")
                     zipIn.copyAndCloseOut(boot.newOutputStream())
@@ -370,7 +379,7 @@ abstract class MagiskInstallImpl protected constructor(
             // Enqueue the shell command first, or the subsequent FIFO open will block
             val future = arrayOf(
                 "cd $installDir",
-                "./magiskboot extract $fifo",
+                "./sunnyboot extract $fifo",
                 "cd /"
             ).eq()
 
@@ -397,7 +406,11 @@ abstract class MagiskInstallImpl protected constructor(
                 Os.close(fd)
             }
 
-            val success = try { future.get().isSuccess } catch (e: Exception) { false }
+            val success = try {
+                future.get().isSuccess
+            } catch (e: Exception) {
+                false
+            }
             if (!success) {
                 console.add("! Error while extracting payload.bin")
                 throw IOException()
@@ -409,10 +422,12 @@ abstract class MagiskInstallImpl protected constructor(
                     console.add("-- Extract init_boot.img")
                     initBoot
                 }
+
                 boot.exists() -> {
                     console.add("-- Extract boot.img")
                     boot
                 }
+
                 else -> {
                     throw NoBootException()
                 }
@@ -539,14 +554,15 @@ abstract class MagiskInstallImpl protected constructor(
         val cmds = arrayOf(
             "cd $installDir",
             "KEEPFORCEENCRYPT=${Config.keepEnc} " +
-            "KEEPVERITY=${Config.keepVerity} " +
-            "PATCHVBMETAFLAG=${Info.patchBootVbmeta} " +
-            "RECOVERYMODE=${Config.recovery} " +
-            "LEGACYSAR=${Info.legacySAR} " +
-            "sh boot_patch.sh $srcBoot")
+                    "KEEPVERITY=${Config.keepVerity} " +
+                    "PATCHVBMETAFLAG=${Info.patchBootVbmeta} " +
+                    "RECOVERYMODE=${Config.recovery} " +
+                    "LEGACYSAR=${Info.legacySAR} " +
+                    "sh boot_patch.sh $srcBoot"
+        )
         val isSuccess = cmds.sh().isSuccess
 
-        shell.newJob().add("./magiskboot cleanup", "cd /").exec()
+        shell.newJob().add("./sunnyboot cleanup", "cd /").exec()
 
         return isSuccess
     }
@@ -616,7 +632,7 @@ abstract class MagiskInstallImpl protected constructor(
 abstract class ConsoleInstaller(
     console: MutableList<String>,
     logs: MutableList<String>
-) : MagiskInstallImpl(console, logs) {
+) : SunnyInstallImpl(console, logs) {
     override suspend fun exec(): Boolean {
         val success = super.exec()
         if (success) {
@@ -628,7 +644,7 @@ abstract class ConsoleInstaller(
     }
 }
 
-abstract class CallBackInstaller : MagiskInstallImpl(DummyList, DummyList) {
+abstract class CallBackInstaller : SunnyInstallImpl(DummyList, DummyList) {
     suspend fun exec(callback: (Boolean) -> Unit): Boolean {
         val success = exec()
         callback(success)
@@ -636,7 +652,7 @@ abstract class CallBackInstaller : MagiskInstallImpl(DummyList, DummyList) {
     }
 }
 
-class MagiskInstaller {
+class SunnyInstaller {
 
     class Patch(
         private val uri: Uri,

@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.fastjien.sunny.R
 import com.fastjien.sunny.core.di.ServiceLocator
 import com.fastjien.sunny.events.DialogBuilder
-import com.fastjien.sunny.view.MagiskDialog
+import com.fastjien.sunny.view.SunnyDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,7 +20,7 @@ abstract class MarkDownDialog : DialogBuilder {
     abstract suspend fun getMarkdownText(): String
 
     @CallSuper
-    override fun build(dialog: MagiskDialog) {
+    override fun build(dialog: SunnyDialog) {
         with(dialog) {
             val view = LayoutInflater.from(context).inflate(R.layout.markdown_window_md2, null)
             setView(view)

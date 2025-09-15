@@ -139,13 +139,13 @@ mmap_data::~mmap_data() {
 string resolve_preinit_dir(const char *base_dir) {
     string dir = base_dir;
     if (access((dir + "/unencrypted").data(), F_OK) == 0) {
-        dir += "/unencrypted/magisk";
+        dir += "/unencrypted/sunny";
     } else if (access((dir + "/adb").data(), F_OK) == 0) {
         dir += "/adb";
     } else if (access((dir + "/watchdog").data(), F_OK) == 0) {
-        dir += "/watchdog/magisk";
+        dir += "/watchdog/sunny";
     } else {
-        dir += "/magisk";
+        dir += "/sunny";
     }
     return dir;
 }

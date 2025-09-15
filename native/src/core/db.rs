@@ -1,5 +1,5 @@
 #![allow(improper_ctypes, improper_ctypes_definitions)]
-use crate::daemon::{MAGISKD, MagiskD};
+use crate::daemon::{SUNNYD, SunnyD};
 use crate::ffi::{
     DbEntryKey, DbStatement, DbValues, MntNsMode, open_and_init_db, sqlite3, sqlite3_errstr,
 };
@@ -186,7 +186,7 @@ unsafe extern "C" fn read_db_row<T: SqlTable>(
     }
 }
 
-impl MagiskD {
+impl SunnyD {
     fn with_db<F: FnOnce(*mut sqlite3) -> i32>(&self, f: F) -> i32 {
         let mut db = self.sql_connection.lock().unwrap();
         if db.is_none() {
@@ -324,7 +324,7 @@ impl MagiskD {
     }
 }
 
-impl MagiskD {
+impl SunnyD {
     pub fn set_db_setting_for_cxx(&self, key: DbEntryKey, value: i32) -> bool {
         self.set_db_setting(key, value).log().is_ok()
     }
@@ -345,7 +345,7 @@ unsafe extern "C" fn sql_exec_for_cxx(
     exec_cookie: *mut c_void,
 ) -> i32 {
     unsafe {
-        MAGISKD.get().unwrap_unchecked().with_db(|db| {
+        SUNNYD.get().unwrap_unchecked().with_db(|db| {
             sql_exec_impl(
                 db,
                 sql,

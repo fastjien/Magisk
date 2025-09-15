@@ -47,7 +47,7 @@ macro_rules! rules {
 }
 
 impl SePolicy {
-    pub fn magisk_rules(&mut self) {
+    pub fn sunny_rules(&mut self) {
         // Temp suppress warnings
         set_log_level_state(LogLevel::Warn, false);
         rules! {
@@ -96,7 +96,7 @@ impl SePolicy {
             allow(["domain"], [proc], ["fd"], ["use"]);
             allow(["domain"], [proc], ["fifo_file"], ["write", "read", "open", "getattr"]);
 
-            // Allow these processes to access MagiskSU and output logs
+            // Allow these processes to access SunnySU and output logs
             allow(["zygote", "shell", "platform_app",
                 "system_app", "priv_app", "untrusted_app", "untrusted_app_all"],
                 [proc], ["unix_stream_socket"], ["connectto", "getopt"]);
@@ -105,10 +105,10 @@ impl SePolicy {
             // For tmpfs overlay on 2SI, Zygisk on lower Android versions and AVD scripts
             allow(["init", "zygote", "shell"], ["tmpfs"], ["file"], all);
 
-            // Allow magiskinit daemon to log to kmsg
+            // Allow sunnyinit daemon to log to kmsg
             allow(["kernel"], ["rootfs", "tmpfs"], ["chr_file"], ["write"]);
 
-            // Allow magiskinit daemon to handle mock selinuxfs
+            // Allow sunnyinit daemon to handle mock selinuxfs
             allow(["kernel"], ["tmpfs"], ["fifo_file"], ["open", "read", "write"]);
 
             // For relabelling files

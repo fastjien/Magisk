@@ -2,15 +2,17 @@
 # ADDOND_VERSION=2
 ########################################################
 #
-# Magisk Survival Script for ROMs with addon.d support
+# Sunny Survival Script for ROMs with addon.d support
 # by topjohnwu and osm0sis
 #
 ########################################################
 
+# TODO 这个脚本的作用是避免在ROM升级的时候，丢失 Sunny root权限
+
 trampoline() {
   mount /data 2>/dev/null
-  if [ -f $MAGISKBIN/addon.d.sh ]; then
-    exec sh $MAGISKBIN/addon.d.sh "$@"
+  if [ -f $SUNNYBIN/addon.d.sh ]; then
+    exec sh $SUNNYBIN/addon.d.sh "$@"
     exit $?
   elif [ "$1" = post-restore ]; then
     BOOTMODE=false
@@ -27,24 +29,24 @@ trampoline() {
     fi
     ui_print() {
       if $BOOTMODE; then
-        log -t Magisk -- "$1"
+        log -t Sunny -- "$1"
       else
         echo -e "ui_print $1\nui_print" >> /proc/self/fd/$OUTFD
       fi
     }
 
     ui_print "***********************"
-    ui_print " Magisk addon.d failed"
+    ui_print " Sunny addon.d failed"
     ui_print "***********************"
-    ui_print "! Cannot find Magisk binaries - was data wiped or not decrypted?"
-    ui_print "! Reflash OTA from decrypted recovery or reflash Magisk"
+    ui_print "! Cannot find Sunny binaries - was data wiped or not decrypted?"
+    ui_print "! Reflash OTA from decrypted recovery or reflash Sunny"
   fi
   exit 1
 }
 
 # Always use the script in /data
-MAGISKBIN=/data/adb/magisk
-[ "$0" = $MAGISKBIN/addon.d.sh ] || trampoline "$@"
+SUNNYBIN=/data/adb/sunny
+[ "$0" = $SUNNYBIN/addon.d.sh ] || trampoline "$@"
 
 V1_FUNCS=/tmp/backuptool.functions
 V2_FUNCS=/postinstall/tmp/backuptool.functions
@@ -60,11 +62,11 @@ fi
 
 initialize() {
   # Load utility functions
-  . $MAGISKBIN/util_functions.sh
+  . $SUNNYBIN/util_functions.sh
 
   if $BOOTMODE; then
     # Override ui_print when booted
-    ui_print() { log -t Magisk -- "$1"; }
+    ui_print() { log -t Sunny -- "$1"; }
   fi
   OUTFD=
   setup_flashable
@@ -86,12 +88,12 @@ main() {
   mkdir -p $TMPDIR
   cd $TMPDIR
 
-  if echo $MAGISK_VER | grep -q '\.'; then
-    PRETTY_VER=$MAGISK_VER
+  if echo $SUNNY_VER | grep -q '\.'; then
+    PRETTY_VER=$SUNNY_VER
   else
-    PRETTY_VER="$MAGISK_VER($MAGISK_VER_CODE)"
+    PRETTY_VER="$SUNNY_VER($SUNNY_VER_CODE)"
   fi
-  print_title "Magisk $PRETTY_VER addon.d"
+  print_title "Sunny $PRETTY_VER addon.d"
 
   mount_partitions
   check_data
@@ -115,7 +117,7 @@ main() {
   ui_print "- Device platform: $ABI"
 
   remove_system_su
-  install_magisk
+  install_sunny
 
   # Cleanups
   cd /
@@ -139,9 +141,9 @@ case "$1" in
       initialize
       RECOVERYMODE=false
       find_boot_image
-      $MAGISKBIN/magiskboot unpack "$BOOTIMAGE"
-      $MAGISKBIN/magiskboot cpio ramdisk.cpio "extract .backup/.magisk config.orig"
-      $MAGISKBIN/magiskboot cleanup
+      $SUNNYBIN/sunnyboot unpack "$BOOTIMAGE"
+      $SUNNYBIN/sunnyboot cpio ramdisk.cpio "extract .backup/.sunny config.orig"
+      $SUNNYBIN/sunnyboot cleanup
     fi
   ;;
   post-backup)

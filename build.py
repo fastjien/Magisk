@@ -68,9 +68,9 @@ support_abis = {
     "riscv64": "riscv64-linux-android",
 }
 default_archs = {"armeabi-v7a", "x86", "arm64-v8a", "x86_64"}
-default_targets = {"magisk", "magiskinit", "magiskboot", "magiskpolicy"}
+default_targets = {"sunny", "sunnyinit", "sunnyboot", "sunnypolicy"}
 support_targets = default_targets | {"resetprop"}
-rust_targets = {"magisk", "magiskinit", "magiskboot", "magiskpolicy"}
+rust_targets = {"sunny", "sunnyinit", "sunnyboot", "sunnypolicy"}
 ondk_version = "r28.5"
 
 # Global vars
@@ -157,8 +157,8 @@ def clean_elf():
     elif args.verbose > 1:
         cmds.append("--verbose")
     cmds.append("--")
-    cmds.extend(glob.glob("native/out/*/magisk"))
-    cmds.extend(glob.glob("native/out/*/magiskpolicy"))
+    cmds.extend(glob.glob("native/out/*/sunny"))
+    cmds.extend(glob.glob("native/out/*/sunnypolicy"))
     run_cargo(cmds)
 
 
@@ -180,7 +180,7 @@ def run_ndk_build(cmds: list):
     if args.verbose > 1:
         cmds.append("V=1")
     if not args.release:
-        cmds.append("MAGISK_DEBUG=1")
+        cmds.append("SUNNY_DEBUG=1")
     proc = execv([ndk_build, *cmds])
     if proc.returncode != 0:
         error("Build binary failed!")
@@ -191,15 +191,15 @@ def build_cpp_src(targets: set):
     cmds = []
     clean = False
 
-    if "magisk" in targets:
-        cmds.append("B_MAGISK=1")
+    if "sunny" in targets:
+        cmds.append("B_SUNNY=1")
         clean = True
 
-    if "magiskpolicy" in targets:
+    if "sunnypolicy" in targets:
         cmds.append("B_POLICY=1")
         clean = True
 
-    if "magiskinit" in targets:
+    if "sunnyinit" in targets:
         cmds.append("B_PRELOAD=1")
 
     if "resetprop" in targets:
@@ -211,10 +211,10 @@ def build_cpp_src(targets: set):
 
     cmds.clear()
 
-    if "magiskinit" in targets:
+    if "sunnyinit" in targets:
         cmds.append("B_INIT=1")
 
-    if "magiskboot" in targets:
+    if "sunnyboot" in targets:
         cmds.append("B_BOOT=1")
 
     if cmds:
@@ -237,7 +237,7 @@ def run_cargo(cmds):
 def build_rust_src(targets: set):
     targets = targets.copy()
     if "resetprop" in targets:
-        targets.add("magisk")
+        targets.add("sunny")
     targets = targets & rust_targets
     if not targets:
         return
@@ -292,16 +292,16 @@ def write_if_diff(file_name: Path, text: str):
 
 def dump_flag_header():
     flag_txt = "#pragma once\n"
-    flag_txt += f'#define MAGISK_VERSION      "{config["version"]}"\n'
-    flag_txt += f'#define MAGISK_VER_CODE     {config["versionCode"]}\n'
-    flag_txt += f"#define MAGISK_DEBUG        {0 if args.release else 1}\n"
+    flag_txt += f'#define SUNNY_VERSION      "{config["version"]}"\n'
+    flag_txt += f'#define SUNNY_VER_CODE     {config["versionCode"]}\n'
+    flag_txt += f"#define SUNNY_DEBUG        {0 if args.release else 1}\n"
 
     native_gen_path = Path("native", "out", "generated")
     native_gen_path.mkdir(mode=0o755, parents=True, exist_ok=True)
     write_if_diff(native_gen_path / "flags.h", flag_txt)
 
-    rust_flag_txt = f'pub const MAGISK_VERSION: &str = "{config["version"]}";\n'
-    rust_flag_txt += f'pub const MAGISK_VER_CODE: i32 = {config["versionCode"]};\n'
+    rust_flag_txt = f'pub const SUNNY_VERSION: &str = "{config["version"]}";\n'
+    rust_flag_txt += f'pub const SUNNY_VER_CODE: i32 = {config["versionCode"]};\n'
     write_if_diff(native_gen_path / "flags.rs", rust_flag_txt)
 
 
@@ -408,7 +408,7 @@ def build_apk(module: str):
 
 
 def build_app():
-    header("* Building the Magisk app")
+    header("* Building the Sunny app")
     apk = build_apk(":apk")
 
     build_type = "release" if args.release else "debug"
@@ -515,7 +515,7 @@ def gen_ide():
     rm_rf(Path("native", "compile_commands.json"))
     run_ndk_build(
         [
-            "B_MAGISK=1",
+            "B_SUNNY=1",
             "B_INIT=1",
             "B_BOOT=1",
             "B_POLICY=1",
@@ -631,7 +631,7 @@ def push_files(script):
     finally:
         rm_rf(busybox)
 
-    proc = execv([adb_path, "push", apk, "/data/local/tmp/magisk.apk"])
+    proc = execv([adb_path, "push", apk, "/data/local/tmp/sunny.apk"])
     if proc.returncode != 0:
         error("adb push failed!")
 
@@ -659,7 +659,7 @@ def patch_avd_file():
         error("adb push failed!")
 
     src_file = f"/data/local/tmp/{input.name}"
-    out_file = f"{src_file}.magisk"
+    out_file = f"{src_file}.sunny"
 
     proc = execv([adb_path, "shell", "sh", "/data/local/tmp/host_patch.sh", src_file])
     if proc.returncode != 0:
@@ -694,7 +694,7 @@ def ensure_paths():
             error("Please set Android SDK path to environment variable ANDROID_HOME")
 
     ndk_root = sdk_path / "ndk"
-    ndk_path = ndk_root / "magisk"
+    ndk_path = ndk_root / "sunny"
     ndk_build = ndk_path / "ndk-build"
     rust_sysroot = ndk_path / "toolchains" / "rust"
     llvm_bin = (
@@ -755,7 +755,7 @@ def load_config():
     gradle_props = Path("app", "gradle.properties")
     if gradle_props.exists():
         for key, value in parse_props(gradle_props).items():
-            if key.startswith("magisk."):
+            if key.startswith("sunny."):
                 config[key[7:]] = value
 
     try:
@@ -776,7 +776,7 @@ def load_config():
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Magisk build script")
+    parser = argparse.ArgumentParser(description="Sunny build script")
     parser.set_defaults(func=lambda x: None)
     parser.add_argument(
         "-r", "--release", action="store_true", help="compile in release mode"
@@ -802,7 +802,7 @@ def parse_args():
         or empty for defaults ({', '.join(default_targets)})",
     )
 
-    app_parser = subparsers.add_parser("app", help="build the Magisk app")
+    app_parser = subparsers.add_parser("app", help="build the Sunny app")
 
     stub_parser = subparsers.add_parser("stub", help="build the stub app")
 
@@ -813,10 +813,10 @@ def parse_args():
         "targets", nargs="*", help="native, cpp, rust, java, or empty to clean all"
     )
 
-    ndk_parser = subparsers.add_parser("ndk", help="setup Magisk NDK")
+    ndk_parser = subparsers.add_parser("ndk", help="setup Sunny NDK")
 
     emu_parser = subparsers.add_parser("emulator", help="setup AVD for development")
-    emu_parser.add_argument("apk", help="a Magisk APK to use", nargs="?")
+    emu_parser.add_argument("apk", help="a Sunny APK to use", nargs="?")
     emu_parser.add_argument(
         "-b", "--build", action="store_true", help="build before patching"
     )
@@ -826,7 +826,7 @@ def parse_args():
     )
     avd_patch_parser.add_argument("image", help="path to ramdisk.img or init_boot.img")
     avd_patch_parser.add_argument("output", help="output file name")
-    avd_patch_parser.add_argument("--apk", help="a Magisk APK to use")
+    avd_patch_parser.add_argument("--apk", help="a Sunny APK to use")
     avd_patch_parser.add_argument(
         "-b", "--build", action="store_true", help="build before patching"
     )
@@ -854,7 +854,7 @@ def parse_args():
     clippy_parser.set_defaults(func=clippy_cli)
     rustup_parser.set_defaults(func=setup_rustup)
     gen_parser.set_defaults(func=gen_ide)
-    # Build Magisk app
+    # Build Sunny app
     app_parser.set_defaults(func=build_app)
     stub_parser.set_defaults(func=build_stub)
     test_parser.set_defaults(func=build_test)
